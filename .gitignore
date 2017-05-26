@@ -12,6 +12,7 @@
 
 .idea
 *.xml
+*.impl
 
 # Package Files #
 *.jar
