@@ -6,4 +6,9 @@ public class Client {
     public static void main(String[] arg){
 
     }
+
+
+    public void test(){
+        return;
+    }
 }
