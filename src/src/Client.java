@@ -8,7 +8,7 @@ public class Client {
     }
 
     private void add(){
-        
+        int i = 1;
     }
 
     public void test(){
