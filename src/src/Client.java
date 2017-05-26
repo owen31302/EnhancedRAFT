@@ -3,4 +3,9 @@
  */
 public class Client {
     int i = 0;
+
+
+    public void test(){
+        return;
+    }
 }
