@@ -4,6 +4,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.io.UnsupportedEncodingException;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -23,7 +24,7 @@ public class Keys {
             e.printStackTrace();
         }
         // init key size to be 1024
-        keyPairGen.initialize(1024);
+        keyPairGen.initialize(512);
 
         // generate key pair
         KeyPair keyPair = keyPairGen.generateKeyPair();
@@ -42,8 +43,13 @@ public class Keys {
     }
 
 
-    public static byte[] encrypt(Key k, String data) {
-        byte[] data_bytes = data.getBytes();
+    public static String encrypt(Key k, String data) {
+        byte[] data_bytes = new byte[0];
+        try {
+            data_bytes = data.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         if (k != null) {
 
@@ -52,7 +58,7 @@ public class Keys {
                 cipher = Cipher.getInstance("RSA");
                 cipher.init(Cipher.ENCRYPT_MODE, k);
                 byte[] resultBytes = cipher.doFinal(data_bytes);
-                return resultBytes;
+                return new String(resultBytes);
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             } catch (NoSuchPaddingException e) {
@@ -70,7 +76,12 @@ public class Keys {
 
 
     public static String decrypt(Key k, String data) {
-        byte[] data_bytes = data.getBytes();
+        byte[] data_bytes = new byte[0];
+        try {
+            data_bytes = data.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         if (k != null) {
 

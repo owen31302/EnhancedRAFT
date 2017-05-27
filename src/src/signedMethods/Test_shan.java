@@ -101,17 +101,22 @@ public class Test_shan {
         RSAPublicKey pubkey_lucy = lucy.getPublicKey();
         RSAPrivateKey prikey_lucy = lucy.getPrivateKey();
 
-        Keys bob = new Keys();
-        RSAPublicKey pubkey_bob = bob.getPublicKey();
-        RSAPrivateKey prikey_bob = bob.getPrivateKey();
+//        Keys bob = new Keys();
+//        RSAPublicKey pubkey_bob = bob.getPublicKey();
+//        RSAPrivateKey prikey_bob = bob.getPrivateKey();
 
 
 
         System.out.println("原文: " + msg);
-        byte[] result = handleData(prikey_lucy, msg.getBytes(enc), 1);
-        System.out.println("加密: " + new String(result, enc));
-        byte[] deresult = handleData(pubkey_bob, result, 0);
-        System.out.println("解密: " + new String(deresult, enc));
+//        byte[] result = handleData(prikey_lucy, msg.getBytes(enc), 1);
+//        System.out.println("加密: " + new String(result, enc));
+        String encryptStr = Keys.encrypt(prikey_lucy, msg);
+        System.out.println("加密: " + encryptStr);
+
+
+//        byte[] deresult = handleData(pubkey_bob, result, 0);
+//        System.out.println("解密: " + new String(deresult, enc));
+        System.out.println("解密: " + Keys.decrypt(pubkey_lucy, encryptStr));
 
 //        msg = "嚯嚯";
 //        // 使用私钥加密公钥解密
