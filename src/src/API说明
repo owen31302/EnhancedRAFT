@@ -1,3 +1,3 @@
 1. 通过网络发消息：
-    需要new 一个 SignedMessage，参数1为你发的消息type，以便接收方识别，参数2为你要发的消息内容，会自动帮你加密
-    把这个new 好的 SignedMessage 传给communicator 帮你send
+    第1步： 需要new 一个 SignedMessage。constructor的 参数1为你发的消息type，以便接收方识别，参数2为你要发的消息内容，会自动帮你加密，参数3为你的private key，这个是存在 Host.privateKey
+    第2步： 把这个new 好的 SignedMessage 传给communicator 帮你send
