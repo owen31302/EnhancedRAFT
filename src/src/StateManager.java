@@ -8,7 +8,7 @@ public class StateManager {
     LinkedList<LogEntry> stateLog;
 
     StateManager(){
-        stateLog = new LinkedList<>();
+        stateLog = new LinkedList<LogEntry>();
     }
 
     public void commitAnEntry(){ //if some node recover from crash, do they have a lot of un-commit entry?

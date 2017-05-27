@@ -1,17 +1,23 @@
+
+
 /**
  * Created by owen on 5/26/17.
  */
 public class Client {
-    int i = 0;
-    public static void main(String[] arg){
+    static public void main(String args[]) {
+        while (true) {
+            System.out.print("Client => ");
+
+        }
+
 
     }
 
-    private void add(){
-        int i = 1;
+    private void decodeCommand() {
+
     }
 
-    public void test(){
-        return;
+    private void setUp(String[] ip, String[] port) {
+
     }
 }
