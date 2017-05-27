@@ -1,5 +1,3 @@
-package signedMethods;
-
 import java.security.interfaces.RSAPrivateKey;
 
 /**
