@@ -65,7 +65,6 @@ public class SignedMessage implements Serializable {
 
             Cipher cipher = null;
             try {
-//                byte[] data_bytes = data.getBytes();
                 cipher = Cipher.getInstance("RSA");
                 cipher.init(Cipher.DECRYPT_MODE, k);
                 byte[] resultBytes = cipher.doFinal(data_bytes);
