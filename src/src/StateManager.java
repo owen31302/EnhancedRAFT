@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -13,6 +14,6 @@ public class StateManager {
     public void commitAnEntry(){ //if some node recover from crash, do they have a lot of un-commit entry?
         //assuming only newest log entry needs to be commit. older entry are committed.
         stateLog.getLast().commitEntry();
-    }
 
+    }
 }
