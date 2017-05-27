@@ -4,6 +4,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -13,7 +14,7 @@ import java.security.NoSuchAlgorithmException;
  * Created by shan on 5/26/17.
  */
 
-public class SignedMessage {
+public class SignedMessage implements Serializable {
     private String messageType;
     private byte[] encryptedMessageContent;
 
