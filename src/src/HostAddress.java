@@ -1,4 +1,4 @@
-import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 
 /**
  * Created by shan on 5/26/17.
@@ -8,15 +8,15 @@ public class HostAddress {
     private String hostName;
     private String hostIp;
     private int hostPort;
-    private RSAPrivateKey privateKey;
+    private RSAPublicKey publicKey;
 
 
-    public RSAPrivateKey getPrivateKey() {
-        return privateKey;
+    public RSAPublicKey getPublicKey() {
+        return publicKey;
     }
 
-    public void setPrivateKey(RSAPrivateKey privateKey) {
-        this.privateKey = privateKey;
+    public void setPublicKey(RSAPublicKey publicKey) {
+        this.publicKey = publicKey;
     }
 
     public HostAddress(String hostName, String hostIp, int hostPort) {

@@ -97,11 +97,11 @@ public class Test_shan {
 
         // 使用公钥加密私钥解密
 
-        Keys lucy = new Keys("lucy", 33);
+        Keys lucy = new Keys();
         RSAPublicKey pubkey_lucy = lucy.getPublicKey();
         RSAPrivateKey prikey_lucy = lucy.getPrivateKey();
 
-        Keys bob = new Keys("bob", 33);
+        Keys bob = new Keys();
         RSAPublicKey pubkey_bob = bob.getPublicKey();
         RSAPrivateKey prikey_bob = bob.getPrivateKey();
 
