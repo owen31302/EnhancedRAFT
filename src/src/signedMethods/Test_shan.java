@@ -12,7 +12,7 @@ import java.security.interfaces.RSAPublicKey;
 
 public class Test_shan {
 
-
+// 最后再看是否要把private key 存在本地，每次都从本地读取
 
 //    public static void makekeyfile(String pubkeyfile, String privatekeyfile)
 //            throws NoSuchAlgorithmException, FileNotFoundException, IOException {
@@ -109,14 +109,19 @@ public class Test_shan {
 
         System.out.println("原文: " + msg);
 //        byte[] result = handleData(prikey_lucy, msg.getBytes(enc), 1);
-//        System.out.println("加密: " + new String(result, enc));
-        String encryptStr = Keys.encrypt(prikey_lucy, msg);
-        System.out.println("加密: " + encryptStr);
+        byte[] result = SignedMessage.encrypt(prikey_lucy, msg);
+//                handleData(prikey_lucy, msg.getBytes(enc), 1);
+
+        System.out.println("加密: " + new String(result, enc));
+//        String encryptStr = Keys.encrypt(prikey_lucy, msg);
+//        System.out.println("加密: " + encryptStr);
 
 
-//        byte[] deresult = handleData(pubkey_bob, result, 0);
+//        byte[] deresult = handleData(pubkey_lucy, result, 0);
+//        byte[] deresult = Keys.decrypt(pubkey_lucy, result);
+
 //        System.out.println("解密: " + new String(deresult, enc));
-        System.out.println("解密: " + Keys.decrypt(pubkey_lucy, encryptStr));
+        System.out.println("解密: " + SignedMessage.decrypt(pubkey_lucy, result));
 
 //        msg = "嚯嚯";
 //        // 使用私钥加密公钥解密
