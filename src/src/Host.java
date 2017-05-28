@@ -18,6 +18,7 @@ public class Host {
     private Candidate candidate;
     private RSAPrivateKey privateKey;
     private RSAPublicKey publicKey;
+    private HostManager hostManager;
     private HostAddress myAddress;   // !!! to store my name, my ip, my port, my public key
     private int term;
 
@@ -28,11 +29,12 @@ public class Host {
         candidate = new Candidate();
         term = 0;
         aServer = new ServerSocket(0);
-        myAddress = new HostAddress(hostName, aServer.getInetAddress().getHostAddress(), aServer.getLocalPort());
         Keys keyPair = new Keys();
         this.publicKey = keyPair.getPublicKey();
         this.privateKey = keyPair.getPrivateKey(); // !!!  to do : send my public key to all other hosts
+        myAddress = new HostAddress(hostName, aServer.getInetAddress().getHostAddress(), aServer.getLocalPort());
         myAddress.setPublicKey(publicKey); // !!! to be put into host_map
+        hostManager = new HostManager(myAddress);
 
     }
 

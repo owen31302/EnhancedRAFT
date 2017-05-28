@@ -1,4 +1,5 @@
 import java.net.Socket;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.HashMap;
 
 /**
@@ -17,6 +18,12 @@ public class HostManager {
         hostList.put(hostName, myAddress);
     }
 
+    HostManager(HostAddress myAddress){
+        this.myAddress = myAddress;
+        leaderAddress = null;
+        hostList = new HashMap<>();
+        hostList.put(myAddress.getHostName(), myAddress);
+    }
     /**
      * This method add a new host's address into list.
      * If list already contains a same host name, update corresponding information
