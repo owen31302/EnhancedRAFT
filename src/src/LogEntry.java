@@ -19,6 +19,7 @@ public class LogEntry {
         this.state = aState.clone();
         this.term = term;
         this.index = index;
+        //this.index = index;
         isCommitted = false;
     }
 
