@@ -37,4 +37,13 @@ public class StateManager {
     public void disableCommitFail() {
         this.commitFailEnable = false;
     }
+
+    /**
+     * This method adds a new state into log list
+     *@param newState a new state to be logged
+     *@param term term
+     */
+    public void appendAnEntry(State newState, int term){
+        stateLog.add(new LogEntry(newState, term, stateLog.size()));
+    }
 }
