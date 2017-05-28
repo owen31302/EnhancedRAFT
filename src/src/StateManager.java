@@ -6,14 +6,35 @@ import java.util.LinkedList;
  */
 public class StateManager {
     LinkedList<LogEntry> stateLog;
+    private Storage fileStoreHandler;
+    private boolean commitFailEnable = false;
 
     StateManager(){
         stateLog = new LinkedList<LogEntry>();
+        this.fileStoreHandler = new Storage("storedValue");
     }
 
-    public void commitAnEntry(){ //if some node recover from crash, do they have a lot of un-commit entry?
+    public boolean commitAnEntry(){
+        //if some node recover from crash, do they have a lot of un-commit entry?
         //assuming only newest log entry needs to be commit. older entry are committed.
-        stateLog.getLast().commitEntry();
+        LogEntry logToCommit = stateLog.getLast();
+        if (logToCommit == null) {
+            return false;
+        }
 
+        if (commitFailEnable) {
+            return false;
+        }else if (fileStoreHandler.storeNewValue(logToCommit)){
+            stateLog.getLast().commitEntry();
+            return true;
+        }else {
+            return false;
+        }
+    }
+    public void enableCommitFail() {
+        this.commitFailEnable = true;
+    }
+    public void disableCommitFail() {
+        this.commitFailEnable = false;
     }
 }
