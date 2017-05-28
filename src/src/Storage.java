@@ -5,11 +5,22 @@ import java.util.*;
  * Created by yujian on 5/27/17.
  */
 public class Storage {
-    private BufferedWriter fileWrite;
+    private FileWriter fileWrite;
     private String fileName;
     private File file;
 
+
+
     public boolean storeNewValue(LogEntry newValue) {
+        String newStringToStore = String.valueOf(newValue.getIndex()) + String.valueOf(newValue.getTerm()) + String.valueOf(newValue.getState().getStateValue());
+        try {
+            fileWrite.write(newStringToStore);
+            fileWrite.flush();
+        }catch (IOException exception) {
+            // why this could happen?
+
+            return false;
+        }
         return true;
     }
     public LogEntry getLatestValue() {
@@ -18,8 +29,6 @@ public class Storage {
     public ArrayList<LogEntry> getAllValue() {
         return new ArrayList<LogEntry>();
     }
-
-
 
 
     public Storage(String valueName) {
@@ -36,7 +45,7 @@ public class Storage {
 
         // set up write, appending mode
         try {
-            fileWrite = new BufferedWriter(new FileWriter(fileName, true));
+            fileWrite = new FileWriter(file, true);
         }catch (IOException exception) {
         }
     }
