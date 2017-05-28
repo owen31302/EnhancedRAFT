@@ -17,7 +17,7 @@ public class Client {
 
     }
 
-    private void setUp(String[] ip, String[] port) {
+    private void setUpNetwork(String[] ip, String[] port) {
 
     }
 }

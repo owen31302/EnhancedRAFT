@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -11,7 +12,13 @@ public class StateManager {
 
     StateManager(){
         stateLog = new LinkedList<LogEntry>();
-        this.fileStoreHandler = new Storage("storedValue");
+        try{
+            this.fileStoreHandler = new Storage("storedValue");
+        }catch (IOException exception) {
+            System.out.println("creating StateManager");
+            exception.printStackTrace();
+        }
+
     }
 
     public boolean commitAnEntry(){
@@ -31,12 +38,6 @@ public class StateManager {
             return false;
         }
     }
-    public void enableCommitFail() {
-        this.commitFailEnable = true;
-    }
-    public void disableCommitFail() {
-        this.commitFailEnable = false;
-    }
 
     /**
      * This method adds a new state into log list
@@ -45,5 +46,32 @@ public class StateManager {
      */
     public void appendAnEntry(State newState, int term){
         stateLog.add(new LogEntry(newState, term, stateLog.size()));
+    }
+
+    /**
+     * This method would delete the last log entry
+     * used by the newly leader to sync its log entries
+     */
+    public void deleteLastEntry() {
+        if (stateLog.isEmpty()) {
+            return;
+        }
+
+        LogEntry logToDelete = stateLog.removeLast();
+
+    }
+
+
+    /**
+     * Let the follower not to commit the entry
+     */
+    public void enableCommitFail() {
+        this.commitFailEnable = true;
+    }
+    /**
+     * Let the follower act normal
+     */
+    public void disableCommitFail() {
+        this.commitFailEnable = false;
     }
 }
