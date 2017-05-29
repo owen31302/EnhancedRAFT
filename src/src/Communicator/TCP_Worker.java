@@ -80,5 +80,17 @@ public class TCP_Worker extends Thread {
                 }
             }
         }
+        closeConnection();
+    }
+
+    public void closeConnection() throws IOException {
+        if (in != null) {
+            in.close();
+        }
+        if (out != null) {
+            out.close();
+        }
+
+        this.clientSocket.close();
     }
 }
