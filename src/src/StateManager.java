@@ -12,12 +12,12 @@ public class StateManager {
 
     StateManager(){
         stateLog = new LinkedList<LogEntry>();
-        try{
+//        try{
             this.fileStoreHandler = new Storage("storedValue");
-        }catch (IOException exception) {
-            System.out.println("creating StateManager");
-            exception.printStackTrace();
-        }
+//        }catch (IOException exception) {
+//            System.out.println("creating StateManager");
+//            exception.printStackTrace();
+//        }
 
     }
 
