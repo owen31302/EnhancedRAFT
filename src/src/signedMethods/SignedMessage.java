@@ -89,4 +89,12 @@ public class SignedMessage implements Serializable {
         }
         return null;
     }
+    public String getMessageType() {
+        return messageType;
+    }
+
+    public byte[] getEncryptedMessageContent() {
+        return encryptedMessageContent;
+    }
+
 }
