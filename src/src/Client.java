@@ -113,6 +113,7 @@ public class Client {
     static private HostAddress findLeader() {
 
     }
+
     static private String decodeCommand(String input) {
         if (input.length() >= 3 && input.substring(0, 3).equals("add")){
             return "add";

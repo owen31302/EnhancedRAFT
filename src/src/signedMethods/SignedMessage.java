@@ -58,8 +58,12 @@ public class SignedMessage implements Serializable {
         return null;
     }
 
-
-    //    public static String decrypt(Key k, byte[] data_bytes) {
+    /**
+     *
+     * @param k
+     * @param data_bytes
+     * @return
+     */
     public static String decrypt(Key k, byte[] data_bytes) {
         if (k != null) {
 

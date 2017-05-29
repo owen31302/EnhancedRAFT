@@ -1,5 +1,4 @@
 import signedMethods.Keys;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -9,7 +8,7 @@ import java.security.interfaces.RSAPublicKey;
 /**
  * Created by TC_Yeh on 5/26/2017.
  */
-public class Host extends Thread{
+public class Host extends Thread {
     private StateManager stateManager;
     //need to store public keys of other hosts
     private ServerSocket aServer;
@@ -39,7 +38,7 @@ public class Host extends Thread{
     }
 
     @Override
-    public void run(){
+    public void run() {
 
         while (true){
             try {
@@ -51,16 +50,11 @@ public class Host extends Thread{
         }
     }
 
-
-
-
-
-    static public void main(String args[]){
+    static public void main(String args[]) {
         try {
             Host test = new Host("test1");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 }
