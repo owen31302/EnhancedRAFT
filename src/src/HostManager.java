@@ -14,14 +14,14 @@ public class HostManager {
     HostManager(String hostName, String ip, int port){
         myAddress = new HostAddress(hostName, ip, port);
         leaderAddress = null;
-        hostList = new HashMap<>();
+        hostList = new HashMap<String, HostAddress>();
         hostList.put(hostName, myAddress);
     }
 
     HostManager(HostAddress myAddress){
         this.myAddress = myAddress;
         leaderAddress = null;
-        hostList = new HashMap<>();
+        hostList = new HashMap<String, HostAddress>();
         hostList.put(myAddress.getHostName(), myAddress);
     }
     /**

@@ -44,7 +44,27 @@ public class Storage {
             output[i] = new LogEntry(new State(stringArray[i][3], Integer.valueOf(stringArray[i][2])), Integer.valueOf(stringArray[i][1]), Integer.valueOf(stringArray[i][0]));
         }
         return output;
-
+    }
+    public boolean deleteLatestCommitedValue() {
+        try {
+            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+            byte b;
+            long length = randomAccessFile.length() ;
+            if (length != 0) {
+                do {
+                    length -= 1;
+                    randomAccessFile.seek(length);
+                    b = randomAccessFile.readByte();
+                } while (b != 10 && length > 0);
+                randomAccessFile.setLength(length);
+                randomAccessFile.close();
+            }
+        }catch (IOException exception) {
+            System.out.println("deleteLatestCommitedValue: ");
+            exception.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
 
@@ -67,6 +87,7 @@ public class Storage {
         }catch (IOException exception) {
             System.out.println("open file writer");
             exception.printStackTrace();
+            System.exit(0);
         }
     }
 

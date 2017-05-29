@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -12,23 +13,24 @@ public class StateManager {
 
     StateManager(){
         stateLog = new LinkedList<LogEntry>();
-        try{
-            this.fileStoreHandler = new Storage("storedValue");
-        }catch (IOException exception) {
-            System.out.println("creating StateManager");
-            exception.printStackTrace();
-        }
+        this.fileStoreHandler = new Storage("storedValue");
+        // reconver logentry from disk
+        stateLog.addAll(Arrays.asList(fileStoreHandler.getAllCommitedValue()));
 
     }
 
-    public boolean commitAnEntry(){
+    /**
+     * This method commits the last entry in the entryLog
+     * can set to not commit, representing hardware failure, demonstrating Raft
+     * @return commit is success
+     */
+    public boolean commitLastEntry(){
         //if some node recover from crash, do they have a lot of un-commit entry?
         //assuming only newest log entry needs to be commit. older entry are committed.
         LogEntry logToCommit = stateLog.getLast();
         if (logToCommit == null) {
             return false;
         }
-
         if (commitFailEnable) {
             return false;
         }else if (fileStoreHandler.storeNewValue(logToCommit)){
@@ -52,13 +54,16 @@ public class StateManager {
      * This method would delete the last log entry
      * used by the newly leader to sync its log entries
      */
-    public void deleteLastEntry() {
+    public boolean deleteLastEntry() {
         if (stateLog.isEmpty()) {
-            return;
+            return true;
         }
-
-        LogEntry logToDelete = stateLog.removeLast();
-
+        if (fileStoreHandler.deleteLatestCommitedValue()) {
+            stateLog.removeLast();
+            return true;
+        }else {
+            return false;
+        }
     }
 
 
