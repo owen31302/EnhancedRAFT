@@ -1,3 +1,5 @@
+package host;
+
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.net.Socket;
@@ -111,7 +113,7 @@ public class Client {
 
     }
     static private HostAddress findLeader() {
-
+            return null;
     }
 
     static private String decodeCommand(String input) {
