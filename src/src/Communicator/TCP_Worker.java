@@ -23,7 +23,6 @@ public class TCP_Worker extends Thread {
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
-
     public TCP_Worker(HostAddress target, TCP_ReplyMsg_All tcp_ReplyMsg_All, SignedMessage msg, RSAPrivateKey privateKey) {
         this.target = target;
         this.tcp_ReplyMsg_All = tcp_ReplyMsg_All;
@@ -50,7 +49,6 @@ public class TCP_Worker extends Thread {
             if (tcp_ReplyMsg_All != null)
                 this.tcp_ReplyMsg_All.addFailedNode(this.target); // if connection fail, record the failed node
         }
-
     }
 
     public void openConnection() {
