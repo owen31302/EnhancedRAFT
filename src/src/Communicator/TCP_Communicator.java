@@ -1,6 +1,6 @@
 package Communicator;
 
-import src.HostManager;
+import host.HostManager;
 
 /**
  * Created by shan on 5/29/17.
@@ -13,8 +13,4 @@ public class TCP_Communicator {
         this.hostManager = hostManager;
         this.tcp_allReply = tcp_allReply;
     }
-
-
-
-
 }

@@ -26,7 +26,7 @@ public class Host extends Thread {
     public Host(String hostName) throws IOException {
         stateManager = new StateManager();
         leader = new Leader();
-        follower = new Follower();
+        follower = new Follower(stateManager);
         candidate = new Candidate();
         term = 0;
         aServer = new ServerSocket(0);
