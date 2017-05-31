@@ -14,28 +14,37 @@ import java.util.Observer;
  */
 public class Host extends Thread implements Observer{
     private StateManager stateManager;
-    //need to store public keys of other hosts
-    private ServerSocket aServer;
+    private Integer currentTerm;
+    private int charactor;
     private Leader leader;
     private Follower follower;
     private Candidate candidate;
+    private HostAddress votedFor;
+    private int commitIndex;
+    private int lastApplied;
+    private int nextIndex[];
+    private int matchIndex[];
+    private int numberOfHosts = 5;
+    //need to store public keys of other hosts
+    private ServerSocket aServer;
     private RSAPrivateKey privateKey;
     private RSAPublicKey publicKey;
     private HostManager hostManager;
     private HostAddress myAddress;   // !!! to store my name, my ip, my port, my public key
-    private Integer term;
 
     public Host(String hostName) throws IOException {
-        stateManager = new StateManager();
-        leader = new Leader();
 
+        stateManager = new StateManager();
+        currentTerm = 0;
+        nextIndex = new int[numberOfHosts-1];
+        matchIndex = new int[numberOfHosts-1];
+
+        charactor = CharacterManagement.FOLLOWER;
         follower = new Follower(stateManager);
         follower.addObserver(this);
         Thread followerThread = new Thread( follower );
         followerThread.start();
 
-        candidate = new Candidate();
-        term = 0;
         aServer = new ServerSocket(0);
         System.out.println(aServer.getInetAddress().getHostAddress() + " at port number: " + aServer.getLocalPort());
         Keys keyPair = new Keys();
@@ -61,16 +70,38 @@ public class Host extends Thread implements Observer{
 
     @Override
     public void update(Observable o, Object arg) {
-        if((int)arg == CharactorChangeProtocal.F2C){
-            System.out.println("I want to become candidate.");
-        }else{
-            System.out.println("Something wrong.");
+        switch ((int)arg){
+            case CharacterManagement.F2C:
+                System.out.println("I want to become candidate.");
+                follower.leave();
+                break;
+            case CharacterManagement.C2L:
+                break;
+            case CharacterManagement.C2F:
+                break;
+            case CharacterManagement.L2F: // new leader wins the term
+                break;
+            default:
+                System.out.println("Something wrong.");
+                break;
         }
+    }
+
+    public Integer getCurrentTerm(){
+        return currentTerm;
+    }
+    public void setCurrentTerm(int term){
+        currentTerm = term;
     }
 
     static public void main(String args[]) {
         try {
             Host test = new Host("test1");
+            Thread.sleep(100); // simulate heartbeat
+            test.follower.receivedHeartBeat();
+            Thread.sleep(100); // simulate appendEntries
+            host.State state = new host.State("x", 1);
+            test.follower.appendAnEntry(state, test.currentTerm);
             Thread.sleep(1000);
         } catch (IOException e) {
             e.printStackTrace();
