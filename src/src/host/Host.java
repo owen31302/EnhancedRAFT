@@ -1,5 +1,6 @@
 package host;
 
+import Communicator.TCP_Communicator;
 import signedMethods.Keys;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -22,6 +23,7 @@ public class Host extends Thread {
     private HostManager hostManager;
     private HostAddress myAddress;   // !!! to store my name, my ip, my port, my public key
     private int term;
+    private TCP_Communicator communicator;
 
     public Host(String hostName) throws IOException {
         stateManager = new StateManager();
@@ -32,11 +34,12 @@ public class Host extends Thread {
         aServer = new ServerSocket(0);
         System.out.println(aServer.getInetAddress().getHostAddress() + " at port number: " + aServer.getLocalPort());
         Keys keyPair = new Keys();
-        this.publicKey = keyPair.getPublicKey();
-        this.privateKey = keyPair.getPrivateKey(); // !!!  to do : send my public key to all other hosts
+        this.publicKey = keyPair.getPublicKey(); // !!!  to do : send my public key to all other hosts
+        this.privateKey = keyPair.getPrivateKey();
         myAddress = new HostAddress(hostName, aServer.getInetAddress().getHostAddress(), aServer.getLocalPort());
         myAddress.setPublicKey(publicKey); // !!! to be put into host_map
         hostManager = new HostManager(myAddress);
+        this.communicator = new TCP_Communicator(this.privateKey);
     }
 
     @Override
