@@ -30,7 +30,7 @@ public class Follower extends Observable implements Runnable {
         }
         System.out.println("Changed!");
         setChanged();
-        notifyObservers(CharactorChangeProtocal.F2C);
+        notifyObservers(CharacterManagement.F2C);
     }
 
     /**
@@ -60,7 +60,9 @@ public class Follower extends Observable implements Runnable {
     }
 
     private int randomTimeout(){
-        return ( int ) ( Math.random() * DURATION ) + BASELATENCY;
+        int result = ( int ) ( Math.random() * DURATION ) + BASELATENCY;
+        System.out.println("Follower Timer reset to " + result + " ms");
+        return result;
     }
 
     public static void main(String[] arg){

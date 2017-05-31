@@ -14,6 +14,7 @@ import java.util.Observer;
  */
 public class Host extends Thread implements Observer{
     private StateManager stateManager;
+    private Integer term;
     //need to store public keys of other hosts
     private ServerSocket aServer;
     private Leader leader;
@@ -23,7 +24,7 @@ public class Host extends Thread implements Observer{
     private RSAPublicKey publicKey;
     private HostManager hostManager;
     private HostAddress myAddress;   // !!! to store my name, my ip, my port, my public key
-    private Integer term;
+    private int charactor;
 
     public Host(String hostName) throws IOException {
         stateManager = new StateManager();
@@ -33,6 +34,7 @@ public class Host extends Thread implements Observer{
         follower.addObserver(this);
         Thread followerThread = new Thread( follower );
         followerThread.start();
+        charactor = CharacterManagement.FOLLOWER;
 
         candidate = new Candidate();
         term = 0;
@@ -61,7 +63,7 @@ public class Host extends Thread implements Observer{
 
     @Override
     public void update(Observable o, Object arg) {
-        if((int)arg == CharactorChangeProtocal.F2C){
+        if((int)arg == CharacterManagement.F2C){
             System.out.println("I want to become candidate.");
         }else{
             System.out.println("Something wrong.");
@@ -71,6 +73,11 @@ public class Host extends Thread implements Observer{
     static public void main(String args[]) {
         try {
             Host test = new Host("test1");
+            Thread.sleep(100); // simulate heartbeat
+            test.follower.receivedHeartBeat();
+            Thread.sleep(100); // simulate appendEntries
+            host.State state = new host.State("x", 1);
+            test.follower.appendAnEntry(state, test.term);
             Thread.sleep(1000);
         } catch (IOException e) {
             e.printStackTrace();
