@@ -9,7 +9,7 @@ public class Follower extends Observable implements Runnable {
     // Send forward, AppendRPCReply, VoteReply, voteRPC
     // follower will random time(300ms - 500ms) out and send the notify to the observer
 
-    private  StateManager _stateManager;
+    private StateManager _stateManager;
     private double _time;
     private final int BASELATENCY = 300;
     private final int DURATION = 200;
@@ -28,7 +28,7 @@ public class Follower extends Observable implements Runnable {
             _time -= (endTime - startTime);
             startTime = endTime;
         }
-        //System.out.println("Changed!");
+        System.out.println("Changed!");
         setChanged();
         notifyObservers(CharactorChangeProtocal.F2C);
     }
