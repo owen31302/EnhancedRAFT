@@ -10,4 +10,5 @@ public class CharacterManagement {
     static final int F2C = 4;
     static final int C2L = 5;
     static final int C2F = 6;
+    static final int L2F = 7;
 }

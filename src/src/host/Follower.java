@@ -13,6 +13,7 @@ public class Follower extends Observable implements Runnable {
     private double _time;
     private final int BASELATENCY = 300;
     private final int DURATION = 200;
+    private boolean _closed = false;
 
     public Follower(StateManager stateManager){
         resetTimer();
@@ -28,9 +29,15 @@ public class Follower extends Observable implements Runnable {
             _time -= (endTime - startTime);
             startTime = endTime;
         }
-        System.out.println("Changed!");
-        setChanged();
-        notifyObservers(CharacterManagement.F2C);
+        if(!_closed){
+            System.out.println("Changed!");
+            setChanged();
+            notifyObservers(CharacterManagement.F2C);
+        }
+    }
+
+    public void leave(){
+        _closed = true;
     }
 
     /**
