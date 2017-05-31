@@ -15,7 +15,8 @@ public class TCP_Communicator {
 //    private RSAPrivateKey privateKey; // i think no need
 
     public TCP_Communicator(RSAPrivateKey privateKey) {
-//        this.privateKey = privateKey;
+//        this.privateKey = privateKey;// i think no need
+
     }
     /**
      * Broadcast message to all hosts, count if replies reach majority
