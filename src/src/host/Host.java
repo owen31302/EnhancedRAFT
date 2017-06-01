@@ -1,5 +1,6 @@
 package host;
 
+import Communicator.TCP_ReplyMsg_All;
 import signedMethods.Keys;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -13,6 +14,7 @@ import java.util.Observer;
  * Created by TC_Yeh on 5/26/2017.
  */
 public class Host extends Thread implements Observer{
+    private String hostName;
     private StateManager stateManager;
     private Integer currentTerm;
     private int charactor;
@@ -22,9 +24,6 @@ public class Host extends Thread implements Observer{
     private HostAddress votedFor;
     private int commitIndex;
     private int lastApplied;
-    private int nextIndex[];
-    private int matchIndex[];
-    private int numberOfHosts = 5;
     //need to store public keys of other hosts
     private ServerSocket aServer;
     private RSAPrivateKey privateKey;
@@ -33,11 +32,9 @@ public class Host extends Thread implements Observer{
     private HostAddress myAddress;   // !!! to store my name, my ip, my port, my public key
 
     public Host(String hostName) throws IOException {
-
+        this.hostName = hostName;
         stateManager = new StateManager();
         currentTerm = 0;
-        nextIndex = new int[numberOfHosts-1];
-        matchIndex = new int[numberOfHosts-1];
 
         charactor = CharacterManagement.FOLLOWER;
         follower = new Follower(stateManager);
@@ -61,7 +58,7 @@ public class Host extends Thread implements Observer{
         while (true){
             try {
                 Socket aRequest= aServer.accept();
-
+                // send user request (State) to leader.
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -72,14 +69,30 @@ public class Host extends Thread implements Observer{
     public void update(Observable o, Object arg) {
         switch ((int)arg){
             case CharacterManagement.F2C:
-                System.out.println("I want to become candidate.");
+                System.out.println("Change from follower to Candidate.");
                 follower.leave();
+                charactor = CharacterManagement.CANDIDATE;
+                candidate = new Candidate(this);
+                candidate.addObserver(this);
+                Thread candidateThread = new Thread(candidate);
+                candidateThread.start();
                 break;
             case CharacterManagement.C2L:
+                candidate.leave();
+                charactor = CharacterManagement.LEADER;
+                // leader should take care of non-up-to-date followers.
+                leader = new Leader(this, candidate.get_tcp_ReplyMsg_All());
+                leader.addObserver(this);
+                Thread leaderThread = new Thread(leader);
+                leaderThread.start();
                 break;
             case CharacterManagement.C2F:
+                // This only happens at the receiver side ...
+                // When new leader is elected ...
                 break;
-            case CharacterManagement.L2F: // new leader wins the term
+            case CharacterManagement.L2F:
+                // This only happens at the receiver side ...
+                // new leader wins the term
                 break;
             default:
                 System.out.println("Something wrong.");
@@ -92,6 +105,21 @@ public class Host extends Thread implements Observer{
     }
     public void setCurrentTerm(int term){
         currentTerm = term;
+    }
+    public RSAPrivateKey getPrivateKey(){
+        return privateKey;
+    }
+    public RSAPublicKey getPublicKey(){
+        return publicKey;
+    }
+    public HostManager getHostManager(){
+        return hostManager;
+    }
+    public String getHostName(){
+        return hostName;
+    }
+    public StateManager getStateManager(){
+        return stateManager;
     }
 
     static public void main(String args[]) {

@@ -16,7 +16,6 @@ public class StateManager {
         this.fileStoreHandler = new Storage("storedValue");
         // reconver logentry from disk
         stateLog.addAll(Arrays.asList(fileStoreHandler.getAllCommitedValue()));
-
     }
 
     /**
@@ -78,5 +77,9 @@ public class StateManager {
      */
     public void disableCommitFail() {
         this.commitFailEnable = false;
+    }
+
+    public LogEntry getLastLog(){
+        return stateLog.getLast();
     }
 }
