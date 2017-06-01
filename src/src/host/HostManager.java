@@ -150,4 +150,8 @@ public class HostManager {
     public String getLeaderName(){
         return leaderAddress.getHostName();
     }
+
+    public HostAddress getHostAddress(String hostName){
+        return hostList.get(hostName);
+    }
 }
