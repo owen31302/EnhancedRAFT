@@ -109,6 +109,38 @@ public class Client {
                 }
             }else if (cmdCode == "quit") {
                 // no need to do so
+                // could just ctrl + C
+                break;
+            }else if (cmdCode == "changeValue") {
+                while (!userInput.startsWith(" ")) {
+                    userInput = userInput.substring(1);
+                }
+                userInput.trim();
+                int newValue = 0;
+                try {
+                    newValue = Integer.valueOf(userInput);
+                }catch (NumberFormatException e) {
+                    System.out.println("please enter a integer number");
+                    continue;
+                }
+                HostAddress leader = findLeader();
+                try{
+                    Socket socket = new Socket(leader.getHostIp(), leader.getHostPort());
+                    ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
+                    ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
+                    outStream.writeChars("changeValue");
+                    outStream.flush();
+                    outStream.writeInt(newValue);
+                    outStream.flush();
+                    int waitingForACK = inStream.readInt();
+                    if(waitingForACK != ClientInstructionCode.Ackowledgement){
+                        System.out.print("ACK NOT RECEIVED\n");
+                        // maybe need to try again
+                    }
+                    socket.close();
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
             }else {
                 System.out.println("invalid command");
             }
@@ -116,7 +148,7 @@ public class Client {
 
 
     }
-    static private HostAddress findLeader() {
+    private static HostAddress findLeader() {
         HostAddress leader = null;
         for (HostAddress s : ServerInfos) {
 
@@ -143,15 +175,17 @@ public class Client {
         return leader;
     }
 
-    static private String decodeCommand(String input) {
+    private static String decodeCommand(String input) {
         if (input.length() >= 3 && input.substring(0, 3).equals("add")){
             return "add";
-        }else if ( input.length() >= "byzantineenable".length() && input.substring(0, "byzantineenable".length()).toLowerCase().equals("byzantineenable")){
+        }else if (input.length() >= "byzantineenable".length() && input.substring(0, "byzantineenable".length()).toLowerCase().equals("byzantineenable")){
             return "byzantineenable";
-        }else if ( input.length() >= "byzantinedisable".length() && input.substring(0, "byzantinedisable".length()).toLowerCase().equals("byzantinedisable")){
+        }else if (input.length() >= "byzantinedisable".length() && input.substring(0, "byzantinedisable".length()).toLowerCase().equals("byzantinedisable")){
             return "byzantinedisable";
-        }else if ( input.length() >= "quit".length() && input.substring(0, "quit".length()).equals("quit")){
+        }else if (input.length() >= "quit".length() && input.substring(0, "quit".length()).toLowerCase().equals("quit")){
             return "quit";
+        }else if (input.length() >= "changevalue".length() && input.substring(0, "changevalue".length()).toLowerCase().equals("changevalue")){
+            return "changeValue";
         }else{
             return "";
         }
