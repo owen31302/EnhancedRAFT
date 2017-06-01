@@ -40,6 +40,7 @@ public class Host extends Thread implements Observer{
         follower = new Follower(stateManager);
         follower.addObserver(this);
         Thread followerThread = new Thread( follower );
+        followerThread.setDaemon(true);
         followerThread.start();
 
         aServer = new ServerSocket(0);
@@ -75,6 +76,7 @@ public class Host extends Thread implements Observer{
                 candidate = new Candidate(this);
                 candidate.addObserver(this);
                 Thread candidateThread = new Thread(candidate);
+                candidateThread.setDaemon(true);
                 candidateThread.start();
                 break;
             case CharacterManagement.C2L:
@@ -84,6 +86,7 @@ public class Host extends Thread implements Observer{
                 leader = new Leader(this, candidate.get_tcp_ReplyMsg_All());
                 leader.addObserver(this);
                 Thread leaderThread = new Thread(leader);
+                leaderThread.setDaemon(true);
                 leaderThread.start();
                 break;
             case CharacterManagement.C2F:
@@ -120,6 +123,9 @@ public class Host extends Thread implements Observer{
     }
     public StateManager getStateManager(){
         return stateManager;
+    }
+    public int getCommitIndex(){
+        return commitIndex;
     }
 
     static public void main(String args[]) {

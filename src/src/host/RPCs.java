@@ -5,5 +5,8 @@ package host;
  */
 public class RPCs {
     static final String REQUESTVOTE = "REQUESTVOTE";
-    static final String APPENDENTRIES = "APPENDENTRIES";
+    static final String APPENDENTRY = "APPENDENTRY";
+    static final String COMMITENTRY = "COMMITENTRY";
+    static final String SUCCESS = "SUCCESS";
+    static final String FAIL = "FAIL";
 }
