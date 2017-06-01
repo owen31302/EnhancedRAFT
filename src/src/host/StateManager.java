@@ -86,4 +86,7 @@ public class StateManager {
     public int getLastIndex(){
         return stateLog.size()-1;
     }
+    public LogEntry getLog(int index){
+        return stateLog.get(index);
+    }
 }

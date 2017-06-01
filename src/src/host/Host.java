@@ -35,6 +35,7 @@ public class Host extends Thread implements Observer{
         this.hostName = hostName;
         stateManager = new StateManager();
         currentTerm = 0;
+        commitIndex = 0;
 
         charactor = CharacterManagement.FOLLOWER;
         follower = new Follower(stateManager);
@@ -126,6 +127,12 @@ public class Host extends Thread implements Observer{
     }
     public int getCommitIndex(){
         return commitIndex;
+    }
+    public int getLastApplied(){
+        return lastApplied;
+    }
+    public void setCommitIndex(int index){
+        commitIndex = index;
     }
 
     static public void main(String args[]) {
