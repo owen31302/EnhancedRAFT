@@ -4,33 +4,30 @@ import Communicator.TCP_Communicator;
 import Communicator.TCP_ReplyMsg_All;
 import signedMethods.SignedMessage;
 
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Observable;
-import java.util.Queue;
 
 /**
  * Created by TC_Yeh on 5/26/2017.
  */
 public class Leader extends Observable implements Runnable {
     private boolean _closed = false;
-    private int _nextIndex[];
-    private boolean _findNextIndex[];
+    private HashMap<String , Integer> _nextIndex;
+    private HashSet<String> _findNextIndex;
     private Host _host;
     private TCP_ReplyMsg_All _tcp_replyMsg_all;
-    private Queue<State> _userRequestQueue;
-    private int _numberOfHosts;
+    private String[] _hostnames;
+    private int _votes;
 
     public Leader(Host host, TCP_ReplyMsg_All tcp_replyMsg_all){
         _host = host;
         _tcp_replyMsg_all = tcp_replyMsg_all;
-        _numberOfHosts = _host.getHostManager().getHostList().size();
-        _nextIndex = new int[_numberOfHosts-1];
-        _findNextIndex = new boolean[_numberOfHosts-1];
-        int lastIndex = _host.getStateManager().getLastIndex();
-        for(int i  = 0; i<_numberOfHosts; i++){
-            _nextIndex[i] = lastIndex;
+        int lastIndex = _host.getCommitIndex();
+        _hostnames = _host.getHostManager().getHostNames();
+        for(String hostname : _hostnames){
+            _nextIndex.put(hostname, lastIndex);
         }
-        _userRequestQueue = new LinkedList<>();
     }
 
     @Override
@@ -46,15 +43,58 @@ public class Leader extends Observable implements Runnable {
         SignedMessage signedMessage;
         TCP_Communicator tcp_communicator = new TCP_Communicator(_host.getPrivateKey());
         while (!_closed){
-            for(int i = 0 ; i < _numberOfHosts ; i++ ){
-                if(!_findNextIndex[i]){
-
-                }else if(_nextIndex[i] != _host.getCommitIndex()){
-
-                }else if(!_userRequestQueue.isEmpty()){
-
+            _votes = 0;
+            HashMap<String, Thread> threads = new HashMap<>();
+            for(String hostname : _hostnames){
+                if(!hostname.equals(_host.getHostManager().getMyHostName())){
+                    if(!_findNextIndex.contains(hostname)){
+                        // new 一個thread，然後去append看看是否成功，如果成功代表我找到相同位置
+                        // 沒有成功，index要decrement，然後再試一次
+                        threads.put(hostname, new Thread(new Leader_Worker(this, LeaderJobs.FINDINDEX, hostname)));
+                    }else if(_nextIndex.get(hostname) <= _host.getCommitIndex()){
+                        // 找到相同位置後，如果不為最新，則要慢慢追上
+                        threads.put(hostname, new Thread(new Leader_Worker(this, LeaderJobs.KEEPUPLOG, hostname)));
+                    }else if(_host.getLastApplied()>_host.getCommitIndex()){
+                        // 前面兩個都通過了，才會執行user request
+                        // 如果投票一直沒過，follower就不斷覆蓋同個位置上的log
+                        threads.put(hostname, new Thread(new Leader_Worker(this, LeaderJobs.APPENDLOG, hostname)));
+                    }else{
+                        // 如果沒新東西就heartbeat
+                        threads.put(hostname, new Thread(new Leader_Worker(this, LeaderJobs.HEARTBEAT, hostname)));
+                    }
+                    threads.get(hostname).setDaemon(true);
+                    threads.get(hostname).start();
                 }
             }
+            // 等所有thread都做完事情
+            for(String hostname : _hostnames){
+                if(!hostname.equals(_host.getHostManager().getMyHostName())){
+                    try{
+                        threads.get(hostname).join();
+                    }catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+            // 計算append log return true是否超過半數
+            // 是，則更新自己的commit，下個while loop會更新follower的log
+            // 否，再繼續while loop
+            if(_votes > _hostnames.length / 2){
+                _host.setCommitIndex(_host.getCommitIndex()+1);
+            }
         }
+    }
+
+    public void set_votes(){
+        _votes++;
+    }
+    public Host get_host(){
+        return _host;
+    }
+    public HashSet<String> get_findNextIndex(){
+        return _findNextIndex;
+    }
+    public HashMap<String , Integer> get_nextIndex(){
+        return _nextIndex;
     }
 }

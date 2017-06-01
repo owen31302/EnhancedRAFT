@@ -2,6 +2,7 @@ package host;
 
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * This class is used for manager all host in the cluster
@@ -106,6 +107,10 @@ public class HostManager {
         return hostList;
     }
 
+    public String[] getHostNames(){
+        return (String[]) hostList.keySet().toArray();
+    }
+
     /**
      * This method returns the name of this host
      * @return host name
@@ -144,5 +149,9 @@ public class HostManager {
      */
     public String getLeaderName(){
         return leaderAddress.getHostName();
+    }
+
+    public HostAddress getHostAddress(String hostName){
+        return hostList.get(hostName);
     }
 }
