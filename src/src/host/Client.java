@@ -13,33 +13,34 @@ import java.io.IOException;
  * Created by owen on 5/26/17.
  */
 public class Client {
+    static private ArrayList<HostAddress> ServerInfos;
     static public void main(String args[]) {
 
         Scanner in = new Scanner(System.in);
         String userInput;
+
         while (true) {
             System.out.print("Client => ");
             userInput = in.nextLine();
             userInput.trim();
             String cmdCode = decodeCommand(userInput);
             if (cmdCode == "add") {
-                ArrayList<HostAddress> serverInfos = addMultipleParser(userInput);
-                String[] allHostInfo = new String[serverInfos.size()];
-                // send host address to all host, unencrypted
+                ServerInfos = addMultipleParser(userInput);
+                String[] allHostInfo = new String[ServerInfos.size()];
+                // send host address to one of the host, unencrypted
                 // message is String type, format goes like:
                 // instruction code
                 // host addresses count number
-                // send host information repeatedly
-                //      hostIP, hostPort
+                // hostIP, hostPort
                 for (int i = 0; i < allHostInfo.length; i ++) {
-                    allHostInfo[i] = new String();
-                    allHostInfo[i] += serverInfos.get(i).getHostIp();
+                    allHostInfo[i] = "";
+                    allHostInfo[i] += ServerInfos.get(i).getHostIp();
                     allHostInfo[i] += ", ";
-                    allHostInfo[i] += serverInfos.get(i).getHostPort();
+                    allHostInfo[i] += ServerInfos.get(i).getHostPort();
                 }
 
                 //
-                for(HostAddress s : serverInfos){
+                for(HostAddress s : ServerInfos){
                     try{
                         Socket socket = new Socket(s.getHostIp(), s.getHostPort());
                         ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
@@ -56,6 +57,9 @@ public class Client {
                         if(waitingForACK != ClientInstructionCode.Ackowledgement){
                             System.out.print("ACK NOT RECEIVED\n");
                             // maybe need to try again
+                        }else {
+                            // one of the host has sent ACK
+                            break;
                         }
                         socket.close();
                     }catch (IOException e){
@@ -113,7 +117,30 @@ public class Client {
 
     }
     static private HostAddress findLeader() {
-            return null;
+        HostAddress leader = null;
+        for (HostAddress s : ServerInfos) {
+
+            try {
+                Socket socket = new Socket(s.getHostIp(), s.getHostPort());
+                ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
+                ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
+                outStream.writeChars("getLeader");
+                outStream.flush();
+                Object receivedLear = inStream.readObject();
+                if (receivedLear instanceof HostAddress) {
+                    leader = (HostAddress)receivedLear;
+                }else {
+                    System.out.println("received hostaddress is not valid");
+                    return null;
+                }
+                socket.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        return leader;
     }
 
     static private String decodeCommand(String input) {
