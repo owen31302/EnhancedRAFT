@@ -15,7 +15,11 @@ import java.io.IOException;
 public class Client {
     static private ArrayList<HostAddress> ServerInfos;
     static public void main(String args[]) {
-
+        // instruction goes like
+        // instruction string first
+        // corresponding content
+        // waiting for ACK
+        // if not received, we might need to send the instruction to another host
         Scanner in = new Scanner(System.in);
         String userInput;
 
@@ -149,6 +153,8 @@ public class Client {
 
     }
     private static HostAddress findLeader() {
+        // ask for leader ip and port
+        // wait for host to reply
         HostAddress leader = null;
         for (HostAddress s : ServerInfos) {
 
