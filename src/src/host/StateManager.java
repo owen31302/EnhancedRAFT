@@ -13,7 +13,7 @@ public class StateManager {
 
     StateManager(){
         stateLog = new LinkedList<LogEntry>();
-        this.fileStoreHandler = new Storage("storedValue");
+        this.fileStoreHandler = new Storage();
         // reconver logentry from disk
         stateLog.addAll(Arrays.asList(fileStoreHandler.getAllCommitedValue()));
     }
