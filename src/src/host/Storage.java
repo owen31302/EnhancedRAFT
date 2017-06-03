@@ -7,23 +7,30 @@ import java.util.*;
  * Created by yujian on 5/27/17.
  */
 public class Storage {
-    private FileWriter fileWrite;
-    private String fileName;
-    private File file;
+    private FileWriter logFileWrite;
+    private File logFile;
+    private String logFilePath = "./logFile.txt";
+    private FileWriter voteFileWrite;
+    private File voteFile;
+    private String voteFilePath = "./vote.txt";
 
 
-
+    /**
+     * This method would write the entry into file and return true if success
+     * @param newValue the entry need to be stored
+     * @return the data has been successfully stored
+     */
     public boolean storeNewValue(LogEntry newValue) {
         try {
-            fileWrite.write(String.valueOf(newValue.getIndex()));
-            fileWrite.write("\t");
-            fileWrite.write(String.valueOf(newValue.getTerm()));
-            fileWrite.write("\t");
-            fileWrite.write(String.valueOf(newValue.getState().getStateValue()));
-            fileWrite.write("\t");
-            fileWrite.write(String.valueOf(newValue.getState().getStateName()));
-            fileWrite.write("\n");
-            fileWrite.flush();
+            logFileWrite.write(String.valueOf(newValue.getIndex()));
+            logFileWrite.write("\t");
+            logFileWrite.write(String.valueOf(newValue.getTerm()));
+            logFileWrite.write("\t");
+            logFileWrite.write(String.valueOf(newValue.getState().getStateValue()));
+            logFileWrite.write("\t");
+            logFileWrite.write(String.valueOf(newValue.getState().getStateName()));
+            logFileWrite.write("\n");
+            logFileWrite.flush();
         }catch (IOException exception) {
             // why this could happen?
 
@@ -31,11 +38,21 @@ public class Storage {
         }
         return true;
     }
+
+    /**
+     * Get last committed log entry
+     * @return log entry
+     */
     public LogEntry getLatestCommitedValue() {
-        String lastLine = getLastLine();
+        String lastLine = getLastLine(logFilePath);
         String[] stringArray = lastLine.split("\t");
         return new LogEntry(new State(stringArray[3], Integer.valueOf(stringArray[2])), Integer.valueOf(stringArray[1]), Integer.valueOf(stringArray[0]));
     }
+
+    /**
+     * Get all committed log entry
+     * @return log entry array
+     */
     public LogEntry[] getAllCommitedValue() {
         ArrayList<String> logInFile = getAllLine();
         String[][] stringArray = new String[logInFile.size()][];
@@ -46,9 +63,14 @@ public class Storage {
         }
         return output;
     }
+
+    /**
+     * Delete the last log entry in the file
+     * @return sccuess
+     */
     public boolean deleteLatestCommitedValue() {
         try {
-            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+            RandomAccessFile randomAccessFile = new RandomAccessFile(logFile, "rw");
             byte b;
             long length = randomAccessFile.length() ;
             if (length != 0) {
@@ -69,37 +91,95 @@ public class Storage {
     }
 
 
-    public Storage(String valueName)  {
-        fileName = "./" + valueName + "Storage.txt";
+    /**
+     * Store vote
+     * @param currentTerm current term of host
+     * @param voteTo vote to host ID
+     * @return success
+     */
+    public boolean storeVote(int currentTerm, int voteTo) {
+        try {
+            voteFileWrite.write(currentTerm);
+            voteFileWrite.write("\t");
+            voteFileWrite.write(voteTo);
+            voteFileWrite.write("\n");
+        }catch (IOException e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Return last vote is under term of
+     * @return term number
+     */
+    public int lastVoteAt() {
+        String lastLine = getLastLine(logFilePath);
+        String[] stringArray = lastLine.split("\t");
+        return Integer.valueOf(stringArray[0]);
+    }
+
+    /**
+     * Return last vote to host ID
+     * @return
+     */
+    public int lastVoteTo() {
+        String lastLine = getLastLine(logFilePath);
+        String[] stringArray = lastLine.split("\t");
+        return Integer.valueOf(stringArray[1]);
+    }
+
+
+    /**
+     * Initializer
+     */
+    Storage()  {
         // build the storage file
         try{
-            file = new File(fileName);
-            if (!file.exists()) {
-                file.createNewFile();
+            logFile = new File(logFilePath);
+            if (!logFile.exists()) {
+                logFile.createNewFile();
             }
         }catch (IOException exception){
-            System.out.println("open file");
+            System.out.println("log file open failed");
             exception.printStackTrace();
         }
 
         // set up write, appending mode
         try {
-            fileWrite = new FileWriter(file, true);
+            logFileWrite = new FileWriter(logFile, true);
         }catch (IOException exception) {
             System.out.println("open file writer");
             exception.printStackTrace();
             System.exit(0);
         }
+
+        try {
+            voteFile = new File(voteFilePath);
+            if (!voteFile.exists()) {
+                voteFile.createNewFile();
+            }
+        }catch (IOException e) {
+            System.out.println("vote file open failed");
+            e.printStackTrace();
+        }
+        try {
+            voteFileWrite = new FileWriter(voteFile, true);
+        }catch (IOException e) {
+            System.out.println("vote file writer create failed");
+            e.printStackTrace();
+        }
+
     }
 
     private ArrayList<String> getAllLine() {
-        if (file == null) {
+        if (logFile == null) {
             System.out.println("file has not created yet");
             return null;
         }
         BufferedReader reader;
         try {
-            reader = new BufferedReader(new FileReader(file));
+            reader = new BufferedReader(new FileReader(logFile));
         }catch (IOException exception) {
             System.out.println("getAllLine: build buffer reader");
             exception.printStackTrace();
@@ -117,36 +197,36 @@ public class Storage {
         }
         return allLog;
     }
-    private String getLastLine() {
+    private String getLastLine(String fileName) {
         RandomAccessFile fileHandler = null;
         try {
-            fileHandler = new RandomAccessFile( file, "r" );
+            fileHandler = new RandomAccessFile(fileName, "r" );
             long fileLength = fileHandler.length() - 1;
             StringBuilder sb = new StringBuilder();
 
             for(long filePointer = fileLength; filePointer != -1; filePointer--){
-                fileHandler.seek( filePointer );
+                fileHandler.seek(filePointer );
                 int readByte = fileHandler.readByte();
 
-                if( readByte == 0xA ) {
+                if(readByte == 0xA) {
                     if( filePointer == fileLength ) {
                         continue;
                     }
                     break;
-                } else if( readByte == 0xD ) {
-                    if( filePointer == fileLength - 1 ) {
+                } else if(readByte == 0xD) {
+                    if(filePointer == fileLength - 1) {
                         continue;
                     }
                     break;
                 }
-                sb.append( ( char ) readByte );
+                sb.append((char)readByte );
             }
             String lastLine = sb.reverse().toString();
             return lastLine;
-        } catch( java.io.FileNotFoundException e ) {
+        } catch(java.io.FileNotFoundException e) {
             e.printStackTrace();
             return null;
-        } catch( java.io.IOException e ) {
+        } catch(java.io.IOException e) {
             e.printStackTrace();
             return null;
         } finally {
