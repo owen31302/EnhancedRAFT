@@ -1,12 +1,11 @@
 package host;
 
-import Communicator.TCP_ReplyMsg_All;
 import signedMethods.Keys;
-import sun.misc.Request;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.interfaces.RSAPrivateKey;
@@ -48,14 +47,14 @@ public class Host extends Thread implements Observer{
         follower.addObserver(this);
         Thread followerThread = new Thread( follower );
         followerThread.setDaemon(true);
-        followerThread.start();
+        //followerThread.start();
 
         aServer = new ServerSocket(0);
-        System.out.println(aServer.getInetAddress().getHostAddress() + " at port number: " + aServer.getLocalPort());
+        System.out.println(InetAddress.getLocalHost().getHostAddress() + " at port number: " + aServer.getLocalPort());
         Keys keyPair = new Keys();
         this.publicKey = keyPair.getPublicKey();
         this.privateKey = keyPair.getPrivateKey(); // !!!  to do : send my public key to all other hosts
-        myAddress = new HostAddress(hostName, aServer.getInetAddress().getHostAddress(), aServer.getLocalPort());
+        myAddress = new HostAddress(hostName, InetAddress.getLocalHost().getHostAddress(), aServer.getLocalPort());
         myAddress.setPublicKey(publicKey); // !!! to be put into host_map
         hostManager = new HostManager(myAddress);
     }
@@ -65,9 +64,9 @@ public class Host extends Thread implements Observer{
 
         while (true){
             try {
-                Socket aRequest= aServer.accept();
-                // send user request (State) to leader.
-
+                RequestResponse aRequest = new RequestResponse(aServer.accept(), -1, null);
+                aRequest.start();
+                System.out.println("get requst");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -149,13 +148,14 @@ public class Host extends Thread implements Observer{
         private int command;
         private Object parameter; // this is
 
-        RequestResponse(Socket aSocketm, int command, Object parameter) {
+        RequestResponse(Socket aSocket, int command, Object parameter) {
             this.aSocket = aSocket;
+            this.parameter = parameter;
             this.command = command; // if command is -1, receive message first
             try {
-                oOut = new ObjectOutputStream(aSocket.getOutputStream());
+                oOut = new ObjectOutputStream(this.aSocket.getOutputStream());
                 oOut.flush();
-                oIn = new ObjectInputStream(aSocket.getInputStream());
+                oIn = new ObjectInputStream(this.aSocket.getInputStream());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -174,9 +174,10 @@ public class Host extends Thread implements Observer{
         public void run() {
             try {
                 if (command == -1) {
+                    System.out.println(aSocket.getInetAddress().getHostAddress());
                     command = oIn.readInt();
                 }
-
+                System.out.println("command:" + command);
                 switch (command) {
                     case Protocol.AddHostAddresses:
                         ArrayList<HostAddress> hostAddressArrayList = (ArrayList<HostAddress>)(oIn.readObject());
@@ -188,7 +189,7 @@ public class Host extends Thread implements Observer{
                             if (!a.equals(myAddress)) {
                                 try {
                                     otherHosts[i] = new RequestResponse(a, Protocol.ASKHOSTNAME, a);
-                                    otherHosts[i].run();
+                                    otherHosts[i].start();
                                     i++;
                                 } catch (IOException e){
                                     hostAddressArrayList.remove(a);
@@ -196,7 +197,7 @@ public class Host extends Thread implements Observer{
                                 }
                             }
                             else {
-                                hostAddressArrayList.remove(a);
+                                //hostAddressArrayList.remove(a);
                             }
                         }
 
@@ -208,9 +209,27 @@ public class Host extends Thread implements Observer{
                             }
                         }
 
-                        for (int j = 0; j < i; j++) {
-                            otherHosts[j] = new RequestResponse(hostAddressArrayList.get(j), Protocol.UPDATEHOSTLIST, null);
-                            otherHosts[j].run();
+//                        for (int j = 0; j < i; j++) {
+//                            otherHosts[j] = new RequestResponse(hostAddressArrayList.get(j), Protocol.UPDATEHOSTLIST, null);
+//                            otherHosts[j].start();
+//
+//                        }
+
+                        i = 0;
+                        for (HostAddress a: hostAddressArrayList){ //ask other hosts' public key
+                            if (!a.equals(myAddress)) {
+                                try {
+                                    otherHosts[i] = new RequestResponse(a, Protocol.UPDATEHOSTLIST, null);
+                                    otherHosts[i].start();
+                                    i++;
+                                } catch (IOException e){
+                                    hostAddressArrayList.remove(a);
+                                    unavailableHost.add(a);
+                                }
+                            }
+                            else {
+                                //hostAddressArrayList.remove(a);
+                            }
                         }
 
                         for (int j = 0; j < i; j++) {
@@ -220,11 +239,15 @@ public class Host extends Thread implements Observer{
                                 e.printStackTrace();
                             }
                         }
+
+                        System.out.println(hostManager);
                         break;
 
                     case Protocol.ASKHOSTNAME:
-                        HostAddress temp = (HostAddress)(parameter);
+                        oOut.flush();
                         oOut.writeInt(Protocol.REPLYHOSTNAME);
+                        System.out.println("send");
+                        HostAddress temp = (HostAddress)(parameter);
                         temp.setHostName((String)oIn.readObject());
                         temp.setPublicKey((RSAPublicKey)oIn.readObject());
                         oOut.writeInt(Protocol.Ackowledgement);
@@ -250,6 +273,7 @@ public class Host extends Thread implements Observer{
                     case Protocol.REPLYHOSTLIST:
                         hostManager.replaceHostList((HashMap<String ,HostAddress>)oIn.readObject());
                         oOut.writeInt(Protocol.Ackowledgement);
+                        System.out.println(hostManager);
                         break;
                 }
             } catch (IOException e) {
@@ -275,6 +299,11 @@ public class Host extends Thread implements Observer{
 //        } catch (InterruptedException e2){
 //            e2.printStackTrace();
 //        }
-
+        try {
+            Host aHost = new Host(args[0]);
+            aHost.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

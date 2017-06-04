@@ -72,8 +72,8 @@ public class Follower extends Observable implements Runnable {
         return result;
     }
 
-    public static void main(String[] arg){
-        StateManager stateManager = new StateManager();
-        (new Thread(new Follower(stateManager))).start();
-    }
+//    public static void main(String[] arg){
+//        StateManager stateManager = new StateManager();
+//        (new Thread(new Follower(stateManager))).start();
+//    }
 }

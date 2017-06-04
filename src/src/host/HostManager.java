@@ -3,6 +3,7 @@ package host;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class is used for manager all host in the cluster
@@ -161,5 +162,13 @@ public class HostManager {
      */
     public void replaceHostList(HashMap<String ,HostAddress> newList){
         hostList = newList;
+    }
+
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        for (Map.Entry<String, HostAddress> a: hostList.entrySet()) {
+            result.append("Host Name: " + a.getValue().getHostName() + " IP:" + a.getValue().getHostIp() + "\n");
+        }
+        return result.toString();
     }
 }

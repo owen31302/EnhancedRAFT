@@ -30,18 +30,21 @@ public class Client {
             String cmdCode = decodeCommand(userInput);
             if (cmdCode == "add") {
                 ServerInfos = addMultipleParser(userInput);
-                String[] allHostInfo = new String[ServerInfos.size()];
+//                for (HostAddress a: ServerInfos) {
+//                    System.out.println(a.getHostName() + ";" + a.getHostIp() + ";" + a.getHostPort());
+//                }
+                //String[] allHostInfo = new String[ServerInfos.size()];
                 // send host address to one of the host, unencrypted
                 // message is String type, format goes like:
                 // instruction code
                 // host addresses count number
                 // hostIP, hostPort
-                for (int i = 0; i < allHostInfo.length; i ++) {
-                    allHostInfo[i] = "";
-                    allHostInfo[i] += ServerInfos.get(i).getHostIp();
-                    allHostInfo[i] += ", ";
-                    allHostInfo[i] += ServerInfos.get(i).getHostPort();
-                }
+//                for (int i = 0; i < allHostInfo.length; i ++) {
+//                    allHostInfo[i] = "";
+//                    allHostInfo[i] += ServerInfos.get(i).getHostIp();
+//                    allHostInfo[i] += ", ";
+//                    allHostInfo[i] += ServerInfos.get(i).getHostPort();
+//                }
 
                 //
                 //for(HostAddress s : ServerInfos){
@@ -49,6 +52,7 @@ public class Client {
                 try{
                     Socket socket = new Socket(s.getHostIp(), s.getHostPort());
                     ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
+                    outStream.flush();
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
 //                    outStream.writeChars("AddHostAddresses");
 //                    outStream.flush();
@@ -60,8 +64,7 @@ public class Client {
 //                        outStream.writeChars(allHostInfo[i]);
 //                        outStream.flush();
 //                    }
-                    int waitingForACK = inStream.readInt();
-                    if(waitingForACK != Protocol.Ackowledgement){
+                    if(inStream.readInt() != Protocol.Ackowledgement){
                         System.out.print("ACK NOT RECEIVED\n");
                         // maybe need to try again
                     }else {

@@ -1,11 +1,12 @@
 package host;
 
+import java.io.Serializable;
 import java.security.interfaces.RSAPublicKey;
 
 /**
  * Created by shan on 5/26/17.
  */
-public class HostAddress {
+public class HostAddress implements Serializable{
 
     private String hostName;
     private String hostIp;
