@@ -244,13 +244,14 @@ public class Host extends Thread implements Observer{
                         break;
 
                     case Protocol.ASKHOSTNAME:
-                        oOut.flush();
                         oOut.writeInt(Protocol.REPLYHOSTNAME);
+                        oOut.flush();
                         System.out.println("send");
                         HostAddress temp = (HostAddress)(parameter);
                         temp.setHostName((String)oIn.readObject());
                         temp.setPublicKey((RSAPublicKey)oIn.readObject());
                         oOut.writeInt(Protocol.Ackowledgement);
+                        oOut.flush();
                         hostManager.addHostToList(temp);
                         break;
 
@@ -264,6 +265,7 @@ public class Host extends Thread implements Observer{
 
                     case Protocol.UPDATEHOSTLIST:
                         oOut.writeInt(Protocol.REPLYHOSTLIST);
+                        oOut.flush();
                         oOut.writeObject(hostManager.getHostList());
                         if(oIn.readInt() != Protocol.Ackowledgement){
                             System.out.println("Error happened when updating host list");
@@ -273,6 +275,7 @@ public class Host extends Thread implements Observer{
                     case Protocol.REPLYHOSTLIST:
                         hostManager.replaceHostList((HashMap<String ,HostAddress>)oIn.readObject());
                         oOut.writeInt(Protocol.Ackowledgement);
+                        oOut.flush();
                         System.out.println(hostManager);
                         break;
                 }
