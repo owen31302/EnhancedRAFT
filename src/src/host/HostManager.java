@@ -154,4 +154,12 @@ public class HostManager {
     public HostAddress getHostAddress(String hostName){
         return hostList.get(hostName);
     }
+
+    /**
+     * This method replaces entire host list with new host list
+     * @param newList new host list
+     */
+    public void replaceHostList(HashMap<String ,HostAddress> newList){
+        hostList = newList;
+    }
 }

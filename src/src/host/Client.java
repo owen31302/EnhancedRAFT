@@ -44,38 +44,41 @@ public class Client {
                 }
 
                 //
-                for(HostAddress s : ServerInfos){
-                    try{
-                        Socket socket = new Socket(s.getHostIp(), s.getHostPort());
-                        ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
-                        ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
-                        outStream.writeChars("AddHostAddresses");
-                        outStream.flush();
-                        outStream.writeInt(allHostInfo.length);
-                        outStream.flush();
-                        for (int i = 0; i < allHostInfo.length; i ++) {
-                            outStream.writeChars(allHostInfo[i]);
-                            outStream.flush();
-                        }
-                        int waitingForACK = inStream.readInt();
-                        if(waitingForACK != ClientInstructionCode.Ackowledgement){
-                            System.out.print("ACK NOT RECEIVED\n");
-                            // maybe need to try again
-                        }else {
-                            // one of the host has sent ACK
-                            break;
-                        }
-                        socket.close();
-                    }catch (IOException e){
-                        System.out.println("Please check the server is active or key in the correct address and port.");
-                        System.out.print("Failed on server ");
-                        System.out.print(s.getHostIp());
-                        System.out.print(", port number ");
-                        System.out.print(s.getHostPort());
-                        System.out.println(".");
-                        e.printStackTrace();
+                //for(HostAddress s : ServerInfos){
+                HostAddress s = ServerInfos.get(0);
+                try{
+                    Socket socket = new Socket(s.getHostIp(), s.getHostPort());
+                    ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
+                    ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
+//                    outStream.writeChars("AddHostAddresses");
+//                    outStream.flush();
+                    outStream.writeInt(Protocol.AddHostAddresses);
+                    outStream.writeObject(ServerInfos);
+//                    outStream.writeInt(allHostInfo.length);
+//                    outStream.flush();
+//                    for (int i = 0; i < allHostInfo.length; i ++) {
+//                        outStream.writeChars(allHostInfo[i]);
+//                        outStream.flush();
+//                    }
+                    int waitingForACK = inStream.readInt();
+                    if(waitingForACK != Protocol.Ackowledgement){
+                        System.out.print("ACK NOT RECEIVED\n");
+                        // maybe need to try again
+                    }else {
+                        // one of the host has sent ACK
+                        break;
                     }
+                    socket.close();
+                }catch (IOException e){
+                    System.out.println("Please check the server is active or key in the correct address and port.");
+                    System.out.print("Failed on server ");
+                    System.out.print(s.getHostIp());
+                    System.out.print(", port number ");
+                    System.out.print(s.getHostPort());
+                    System.out.println(".");
+                    e.printStackTrace();
                 }
+             //   }
             }else if (cmdCode == "byzantineenable") {
                 HostAddress leader = findLeader();
                 try{
@@ -85,7 +88,7 @@ public class Client {
                     outStream.writeChars("byzantineEnable");
                     outStream.flush();
                     int waitingForACK = inStream.readInt();
-                    if(waitingForACK != ClientInstructionCode.Ackowledgement){
+                    if(waitingForACK != Protocol.Ackowledgement){
                         System.out.print("ACK NOT RECEIVED\n");
                         // maybe need to try again
                     }
@@ -103,7 +106,7 @@ public class Client {
                     outStream.writeChars("byzantineDisable");
                     outStream.flush();
                     int waitingForACK = inStream.readInt();
-                    if(waitingForACK != ClientInstructionCode.Ackowledgement){
+                    if(waitingForACK != Protocol.Ackowledgement){
                         System.out.print("ACK NOT RECEIVED\n");
                         // maybe need to try again
                     }
@@ -137,7 +140,7 @@ public class Client {
                     outStream.writeInt(newValue);
                     outStream.flush();
                     int waitingForACK = inStream.readInt();
-                    if(waitingForACK != ClientInstructionCode.Ackowledgement){
+                    if(waitingForACK != Protocol.Ackowledgement){
                         System.out.print("ACK NOT RECEIVED\n");
                         // maybe need to try again
                     }

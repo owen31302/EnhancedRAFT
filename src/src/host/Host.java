@@ -2,11 +2,17 @@ package host;
 
 import Communicator.TCP_ReplyMsg_All;
 import signedMethods.Keys;
+import sun.misc.Request;
+
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -61,6 +67,7 @@ public class Host extends Thread implements Observer{
             try {
                 Socket aRequest= aServer.accept();
                 // send user request (State) to leader.
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -135,19 +142,139 @@ public class Host extends Thread implements Observer{
         commitIndex = index;
     }
 
-    static public void main(String args[]) {
-        try {
-            Host test = new Host("test1");
-            Thread.sleep(100); // simulate heartbeat
-            test.follower.receivedHeartBeat();
-            Thread.sleep(100); // simulate appendEntries
-            host.State state = new host.State("x", 1);
-            test.follower.appendAnEntry(state, test.currentTerm);
-            Thread.sleep(1000);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e2){
-            e2.printStackTrace();
+    class RequestResponse extends Thread {
+        private Socket aSocket;
+        private ObjectOutputStream oOut;
+        private ObjectInputStream oIn;
+        private int command;
+        private Object parameter; // this is
+
+        RequestResponse(Socket aSocketm, int command, Object parameter) {
+            this.aSocket = aSocket;
+            this.command = command; // if command is -1, receive message first
+            try {
+                oOut = new ObjectOutputStream(aSocket.getOutputStream());
+                oOut.flush();
+                oIn = new ObjectInputStream(aSocket.getInputStream());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
+        RequestResponse(HostAddress hostAddress, int command, Object parameter) throws IOException {
+            this.command = command;
+            this.parameter = parameter;
+            aSocket = new Socket(hostAddress.getHostIp(), hostAddress.getHostPort());
+            oOut = new ObjectOutputStream(aSocket.getOutputStream());
+            oOut.flush();
+            oIn = new ObjectInputStream(aSocket.getInputStream());
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (command == -1) {
+                    command = oIn.readInt();
+                }
+
+                switch (command) {
+                    case Protocol.AddHostAddresses:
+                        ArrayList<HostAddress> hostAddressArrayList = (ArrayList<HostAddress>)(oIn.readObject());
+                        //asking other host for their public key
+                        RequestResponse[] otherHosts = new RequestResponse[hostAddressArrayList.size() - 1];
+                        ArrayList<HostAddress> unavailableHost = new ArrayList<HostAddress>();
+                        int i = 0;
+                        for (HostAddress a: hostAddressArrayList){ //ask other hosts' public key
+                            if (!a.equals(myAddress)) {
+                                try {
+                                    otherHosts[i] = new RequestResponse(a, Protocol.ASKHOSTNAME, a);
+                                    otherHosts[i].run();
+                                    i++;
+                                } catch (IOException e){
+                                    hostAddressArrayList.remove(a);
+                                    unavailableHost.add(a);
+                                }
+                            }
+                            else {
+                                hostAddressArrayList.remove(a);
+                            }
+                        }
+
+                        for (int j = 0; j < i; j++) { //waiting for getting public keys
+                            try {
+                                otherHosts[j].join();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        for (int j = 0; j < i; j++) {
+                            otherHosts[j] = new RequestResponse(hostAddressArrayList.get(j), Protocol.UPDATEHOSTLIST, null);
+                            otherHosts[j].run();
+                        }
+
+                        for (int j = 0; j < i; j++) {
+                            try {
+                                otherHosts[j].join();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        break;
+
+                    case Protocol.ASKHOSTNAME:
+                        HostAddress temp = (HostAddress)(parameter);
+                        oOut.writeInt(Protocol.REPLYHOSTNAME);
+                        temp.setHostName((String)oIn.readObject());
+                        temp.setPublicKey((RSAPublicKey)oIn.readObject());
+                        oOut.writeInt(Protocol.Ackowledgement);
+                        hostManager.addHostToList(temp);
+                        break;
+
+                    case Protocol.REPLYHOSTNAME:
+                        oOut.writeObject(hostName);
+                        oOut.writeObject(publicKey);
+                        if (oIn.readInt() != Protocol.Ackowledgement){
+                            System.out.println("Error happened when sending host name");
+                        }
+                        break;
+
+                    case Protocol.UPDATEHOSTLIST:
+                        oOut.writeInt(Protocol.REPLYHOSTLIST);
+                        oOut.writeObject(hostManager.getHostList());
+                        if(oIn.readInt() != Protocol.Ackowledgement){
+                            System.out.println("Error happened when updating host list");
+                        }
+                        break;
+
+                    case Protocol.REPLYHOSTLIST:
+                        hostManager.replaceHostList((HashMap<String ,HostAddress>)oIn.readObject());
+                        oOut.writeInt(Protocol.Ackowledgement);
+                        break;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    static public void main(String args[]) {
+//        try {
+//            Host test = new Host("test1");
+//            Thread.sleep(100); // simulate heartbeat
+//            test.follower.receivedHeartBeat();
+//            Thread.sleep(100); // simulate appendEntries
+//            host.State state = new host.State("x", 1);
+//            test.follower.appendAnEntry(state, test.currentTerm);
+//            Thread.sleep(1000);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (InterruptedException e2){
+//            e2.printStackTrace();
+//        }
+
     }
 }

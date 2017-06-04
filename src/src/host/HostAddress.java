@@ -60,4 +60,8 @@ public class HostAddress {
         this.hostPort = hostPort;
     }
 
+    public boolean equals(HostAddress hostAddress){
+        return hostAddress.getHostIp().equals(hostIp) && hostAddress.getHostPort() == hostPort;
+    }
+
 }
