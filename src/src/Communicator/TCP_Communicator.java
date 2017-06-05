@@ -18,6 +18,7 @@ public class TCP_Communicator {
 //        this.privateKey = privateKey;// i think no need
 
     }
+
     /**
      * Broadcast message to all hosts, count if replies reach majority
      * @param hostManager give host manager who has all hosts infor

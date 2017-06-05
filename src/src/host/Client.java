@@ -69,7 +69,7 @@ public class Client {
                         // maybe need to try again
                     }else {
                         // one of the host has sent ACK
-                        break;
+                        //break;
                     }
                     socket.close();
                 }catch (IOException e){

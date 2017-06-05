@@ -12,4 +12,5 @@ public class Protocol {
     public static final int REPLYHOSTNAME = 5;
     public static final int UPDATEHOSTLIST = 6;
     public static final int REPLYHOSTLIST = 7;
+    public static final int RPCREQUEST = 8;
 }

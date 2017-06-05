@@ -1,6 +1,7 @@
 package host;
 
 import java.net.Socket;
+import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -170,5 +171,29 @@ public class HostManager {
             result.append("Host Name: " + a.getValue().getHostName() + " IP:" + a.getValue().getHostIp() + "\n");
         }
         return result.toString();
+    }
+
+    /**
+     * This method checks if a ip, port pair in the host list
+     * @param ip ip
+     * @return true if in the host list
+     */
+    public boolean isInHostList(String ip){
+
+        for (Map.Entry<String, HostAddress> a: hostList.entrySet()) {
+            if (a.getValue().getHostIp().equals(ip)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public RSAPublicKey getPublicKey(String ip){
+        for (Map.Entry<String, HostAddress> a: hostList.entrySet()) {
+            if (a.getValue().getHostIp().equals(ip)) {
+                return a.getValue().getPublicKey();
+            }
+        }
+        return null;
     }
 }

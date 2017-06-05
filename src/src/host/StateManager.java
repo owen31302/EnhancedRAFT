@@ -1,18 +1,30 @@
 package host;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
  * Created by TC_Yeh on 5/26/2017.
  */
 public class StateManager {
-    LinkedList<LogEntry> stateLog;
+    private ArrayList<LogEntry> stateLog;
+    private HashMap<String, State> states;
     private Storage fileStoreHandler;
     private boolean commitFailEnable = false;
 
-    StateManager(){
-        stateLog = new LinkedList<LogEntry>();
+    StateManager(String[] stateName){
+        stateLog = new ArrayList<LogEntry>(16);
+        states = new HashMap<>();
+
+        for (String name: stateName) {
+            State initializedState = new State(name, 0);
+            LogEntry initialLog = new LogEntry(initializedState, 0, 0);
+            states.put(name, initializedState);
+            stateLog.add(initialLog);
+        }
+
         this.fileStoreHandler = new Storage();
         // reconver logentry from disk
         stateLog.addAll(Arrays.asList(fileStoreHandler.getAllCommitedValue()));
@@ -26,14 +38,14 @@ public class StateManager {
     public boolean commitLastEntry(){
         //if some node recover from crash, do they have a lot of un-commit entry?
         //assuming only newest log entry needs to be commit. older entry are committed.
-        LogEntry logToCommit = stateLog.getLast();
+        LogEntry logToCommit = stateLog.get(stateLog.size()-1); //get newest
         if (logToCommit == null) {
             return false;
         }
         if (commitFailEnable) {
             return false;
         }else if (fileStoreHandler.storeNewValue(logToCommit)){
-            stateLog.getLast().commitEntry();
+            stateLog.get(stateLog.size()-1).commitEntry();
             return true;
         }else {
             return false;
@@ -58,7 +70,7 @@ public class StateManager {
             return true;
         }
         if (fileStoreHandler.deleteLatestCommitedValue()) {
-            stateLog.removeLast();
+            stateLog.remove(stateLog.size()-1);
             return true;
         }else {
             return false;
@@ -80,7 +92,7 @@ public class StateManager {
     }
 
     public LogEntry getLastLog(){
-        return stateLog.getLast();
+        return stateLog.get(stateLog.size()-1);
     }
 
     public int getLastIndex(){

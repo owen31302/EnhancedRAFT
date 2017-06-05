@@ -1,6 +1,8 @@
 package host;
 
+import Communicator.TCP_Communicator;
 import signedMethods.Keys;
+import signedMethods.SignedMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -35,19 +37,18 @@ public class Host extends Thread implements Observer{
     private RSAPublicKey publicKey;
     private HostManager hostManager;
     private HostAddress myAddress;   // !!! to store my name, my ip, my port, my public key
+    private Thread followerThread;
+    private Integer votedTerm;
 
-    public Host(String hostName) throws IOException {
-        this.hostName = hostName;
-        stateManager = new StateManager();
+    public Host() throws IOException {
+        hostName = InetAddress.getLocalHost().getHostAddress();
+        stateManager = new StateManager(new String[]{"x", "y", "z"});
         currentTerm = 0;
         commitIndex = 0;
-
+        votedTerm = 0;
         charactor = CharacterManagement.FOLLOWER;
         follower = new Follower(stateManager);
         follower.addObserver(this);
-        Thread followerThread = new Thread( follower );
-        followerThread.setDaemon(true);
-        //followerThread.start();
 
         aServer = new ServerSocket(0);
         System.out.println(InetAddress.getLocalHost().getHostAddress() + " at port number: " + aServer.getLocalPort());
@@ -78,6 +79,7 @@ public class Host extends Thread implements Observer{
         switch ((int)arg){
             case CharacterManagement.F2C:
                 System.out.println("Change from follower to Candidate.");
+                currentTerm++;
                 follower.leave();
                 charactor = CharacterManagement.CANDIDATE;
                 candidate = new Candidate(this);
@@ -152,31 +154,31 @@ public class Host extends Thread implements Observer{
             this.aSocket = aSocket;
             this.parameter = parameter;
             this.command = command; // if command is -1, receive message first
-            try {
-                oOut = new ObjectOutputStream(this.aSocket.getOutputStream());
-                oOut.flush();
-                oIn = new ObjectInputStream(this.aSocket.getInputStream());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
         }
 
         RequestResponse(HostAddress hostAddress, int command, Object parameter) throws IOException {
             this.command = command;
             this.parameter = parameter;
             aSocket = new Socket(hostAddress.getHostIp(), hostAddress.getHostPort());
-            oOut = new ObjectOutputStream(aSocket.getOutputStream());
-            oOut.flush();
-            oIn = new ObjectInputStream(aSocket.getInputStream());
         }
 
         @Override
         public void run() {
             try {
-                if (command == -1) {
-                    System.out.println(aSocket.getInetAddress().getHostAddress());
-                    command = oIn.readInt();
+                System.out.println("IP:" + aSocket.getInetAddress().getHostAddress());
+                if (hostManager.isInHostList(aSocket.getInetAddress().getHostAddress())) {
+                    command = Protocol.RPCREQUEST;
                 }
+                else{
+                    oOut = new ObjectOutputStream(aSocket.getOutputStream());
+                    oOut.flush();
+                    oIn = new ObjectInputStream(aSocket.getInputStream());
+                    if (command == -1) {
+                        command = oIn.readInt();
+                    }
+                }
+
                 System.out.println("command:" + command);
                 switch (command) {
                     case Protocol.AddHostAddresses:
@@ -240,7 +242,12 @@ public class Host extends Thread implements Observer{
                             }
                         }
 
+                        oOut.writeInt(Protocol.Ackowledgement);
+                        oOut.flush();
                         System.out.println(hostManager);
+                        followerThread = new Thread( follower );
+                        followerThread.setDaemon(true);
+                        followerThread.start();
                         break;
 
                     case Protocol.ASKHOSTNAME:
@@ -277,7 +284,47 @@ public class Host extends Thread implements Observer{
                         oOut.writeInt(Protocol.Ackowledgement);
                         oOut.flush();
                         System.out.println(hostManager);
+                        followerThread = new Thread( follower );
+                        followerThread.setDaemon(true);
+                        followerThread.start();
                         break;
+
+                    case Protocol.RPCREQUEST:
+                        TCP_Communicator tempTCP = new TCP_Communicator(privateKey);
+                        SignedMessage receivedMSG = tempTCP.receiveFromOne(aSocket);
+                        String RPC = receivedMSG.getMessageType();
+                        HostAddress requestHost = hostManager.getHostAddress(aSocket.getInetAddress().getHostName());
+                        String planText = receivedMSG.getPlanText(hostManager.getPublicKey(aSocket.getInetAddress().getHostAddress()));
+                        System.out.println("Plan text: " + planText);
+                        switch (RPC) {
+                            case RPCs.REQUESTVOTE:
+                                String[] aurgments = planText.split(",");
+                                int candidateTerm = Integer.parseInt(aurgments[0]);
+                                int lastLogIndex = Integer.parseInt(aurgments[2]);
+                                int lastLogTerm = Integer.parseInt(aurgments[3]);
+                                synchronized (votedTerm) {
+                                    if (votedTerm < candidateTerm && currentTerm <= candidateTerm
+                                            && stateManager.getLastIndex() <= lastLogIndex && stateManager.getLastLog().getTerm() <= lastLogTerm) {
+                                        votedTerm++;
+                                        tempTCP.replyToOne(requestHost, aSocket, new SignedMessage(RPCs.REQUESTVOTE, "grant", requestHost.getPublicKey()));
+                                        System.out.println("grant vote");
+                                    }
+                                    break;
+                                }
+                        }
+                        break;
+                }
+
+                if (oOut != null) {
+                    oOut.close();
+                }
+
+                if (oIn != null) {
+                    oIn.close();
+                }
+
+                if (!aSocket.isClosed()) {
+                    aSocket.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -303,7 +350,7 @@ public class Host extends Thread implements Observer{
 //            e2.printStackTrace();
 //        }
         try {
-            Host aHost = new Host(args[0]);
+            Host aHost = new Host();
             aHost.start();
         } catch (IOException e) {
             e.printStackTrace();
