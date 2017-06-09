@@ -122,7 +122,7 @@ public class TCP_Worker extends Thread {
 
         // sent to one, round trip
         if (this.jobType.equals(JobType.sentToOne)) {
-            if (DEBUG) System.out.println("From TCP_worker: jobType is " + this.jobType);
+            if (DEBUG) System.out.println("From TCP_worker: jobType is sentToOne = " + this.jobType);
             out.writeObject(msg);
             if (DEBUG) System.out.println("From TCP_worker: msg is sent ");
 
@@ -141,7 +141,7 @@ public class TCP_Worker extends Thread {
 
         // sent to all, round trip
         if (this.jobType.equals(JobType.sentToAll)){
-            if (DEBUG) System.out.println("From TCP_worker: jobType is " + this.jobType);
+            if (DEBUG) System.out.println("From TCP_worker: jobType is sentToAll = " + this.jobType);
             out.writeObject(msg);
             if (DEBUG) System.out.println("From TCP_worker: msg is sent ");
             //  out.flush();
@@ -164,9 +164,11 @@ public class TCP_Worker extends Thread {
         // receive from one specified client socket, one trip
 
         if (this.jobType.equals(JobType.receiveFromOne)) {
-            if (DEBUG) System.out.println("From TCP_worker: jobType is " + this.jobType);
+            if (DEBUG) System.out.println("From TCP_worker: jobType is receiveFromOne = " + this.jobType);
 
             SignedMessage replyMsg = (SignedMessage) in.readObject();
+            if (DEBUG) System.out.println("From TCP_worker: message is received ");
+
             this.tcp_ReplyMsg_One.setMessage(replyMsg);
 
             synchronized (this.tcp_ReplyMsg_One) {
