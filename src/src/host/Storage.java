@@ -23,12 +23,12 @@ public class Storage {
     public boolean storeNewValue(LogEntry newValue) {
         try {
             logFileWrite.write(String.valueOf(newValue.getIndex()));
-            logFileWrite.write("\t");
+            logFileWrite.write("\t\t");
             logFileWrite.write(String.valueOf(newValue.getTerm()));
-            logFileWrite.write("\t");
-            logFileWrite.write(String.valueOf(newValue.getState().getStateValue()));
-            logFileWrite.write("\t");
+            logFileWrite.write("\t\t");
             logFileWrite.write(String.valueOf(newValue.getState().getStateName()));
+            logFileWrite.write("\t\t");
+            logFileWrite.write(String.valueOf(newValue.getState().getStateValue()));
             logFileWrite.write("\n");
             logFileWrite.flush();
         }catch (IOException exception) {
@@ -39,6 +39,8 @@ public class Storage {
         return true;
     }
 
+
+
     /**
      * Get last committed log entry
      * @return log entry
@@ -46,7 +48,7 @@ public class Storage {
     public LogEntry getLatestCommitedValue() {
         String lastLine = getLastLine(logFilePath);
         String[] stringArray = lastLine.split("\t");
-        return new LogEntry(new State(stringArray[3], Integer.valueOf(stringArray[2])), Integer.valueOf(stringArray[1]), Integer.valueOf(stringArray[0]));
+        return new LogEntry(new State(stringArray[2], Integer.valueOf(stringArray[3])), Integer.valueOf(stringArray[1]), Integer.valueOf(stringArray[0]));
     }
 
     /**
@@ -57,10 +59,11 @@ public class Storage {
         ArrayList<String> logInFile = getAllLine();
         String[][] stringArray = new String[logInFile.size()][];
         LogEntry[] output = new LogEntry[logInFile.size()];
-        for (int i = 0; i < logInFile.size(); i ++) {
-            stringArray[i] = logInFile.get(i).split("\t");
-            output[i] = new LogEntry(new State(stringArray[i][3], Integer.valueOf(stringArray[i][2])), Integer.valueOf(stringArray[i][1]), Integer.valueOf(stringArray[i][0]));
+        for (int i = 1; i < logInFile.size(); i ++) {
+            stringArray[i] = logInFile.get(i).split("\t\t");
+            output[i] = new LogEntry(new State(stringArray[i][2], Integer.valueOf(stringArray[i][3])), Integer.valueOf(stringArray[i][1]), Integer.valueOf(stringArray[i][0]));
         }
+
         return output;
     }
 
@@ -133,12 +136,15 @@ public class Storage {
     /**
      * Initializer
      */
-    Storage()  {
+    Storage() {
+        boolean newFile = false;
         // build the storage file
         try{
             logFile = new File(logFilePath);
             if (!logFile.exists()) {
                 logFile.createNewFile();
+                System.out.println("create file");
+                newFile = true;
             }
         }catch (IOException exception){
             System.out.println("log file open failed");
@@ -153,7 +159,13 @@ public class Storage {
             exception.printStackTrace();
             System.exit(0);
         }
-
+        if (newFile) {
+            try {
+                logFileWrite.write("Index\tTerm\tVariableName\tValue\n");
+            }catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
         try {
             voteFile = new File(voteFilePath);
             if (!voteFile.exists()) {
