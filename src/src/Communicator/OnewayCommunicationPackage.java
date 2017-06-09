@@ -28,7 +28,7 @@ public class OnewayCommunicationPackage {
      * @return received message from this socket
      */
     public SignedMessage receiveFromOne() {
-        boolean DEBUG = true;
+        boolean DEBUG = false;
         if (DEBUG) System.out.println("From onewayCommu: enter receiveFromOne()");
 
         this.received_Msg = new TCP_ReplyMsg_One();
@@ -59,7 +59,7 @@ public class OnewayCommunicationPackage {
      * @return if message is sent succefully
      */
     public boolean replyToOne(SignedMessage reply_msg) {
-        boolean DEBUG = true;
+        boolean DEBUG = false;
         if (DEBUG) System.out.println("From onewayCommu: enter replyToOne()");
 
         this.tcp_worker.getTcp_ReplyMsg_One().setMessage(null); // erase it for get new reply
