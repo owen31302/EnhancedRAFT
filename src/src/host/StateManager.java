@@ -38,14 +38,18 @@ public class StateManager {
     public boolean commitLastEntry(){
         //if some node recover from crash, do they have a lot of un-commit entry?
         //assuming only newest log entry needs to be commit. older entry are committed.
-        LogEntry logToCommit = stateLog.get(stateLog.size()-1); //get newest
+        return commitEntry(stateLog.size() - 1);
+    }
+
+    public boolean commitEntry(int at) {
+        LogEntry logToCommit = stateLog.get(at);
         if (logToCommit == null) {
             return false;
         }
         if (commitFailEnable) {
             return false;
         }else if (fileStoreHandler.storeNewValue(logToCommit)){
-            stateLog.get(stateLog.size()-1).commitEntry();
+            stateLog.get(at).commitEntry();
             return true;
         }else {
             return false;
