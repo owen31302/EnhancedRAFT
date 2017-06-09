@@ -150,11 +150,13 @@ public class Host extends Thread implements Observer{
         private ObjectInputStream oIn;
         private int command;
         private Object parameter; // this is
+        private boolean RPCFlag;
 
         RequestResponse(Socket aSocket, int command, Object parameter) {
             this.aSocket = aSocket;
             this.parameter = parameter;
             this.command = command; // if command is -1, receive message first
+            RPCFlag = true;
 
         }
 
@@ -162,13 +164,14 @@ public class Host extends Thread implements Observer{
             this.command = command;
             this.parameter = parameter;
             aSocket = new Socket(hostAddress.getHostIp(), hostAddress.getHostPort());
+            RPCFlag = false;
         }
 
         @Override
         public void run() {
             try {
                 System.out.println("IP:" + aSocket.getInetAddress().getHostAddress());
-                if (hostManager.isInHostList(aSocket.getInetAddress().getHostAddress())) {
+                if (RPCFlag && hostManager.isInHostList(aSocket.getInetAddress().getHostAddress())) {
                     command = Protocol.RPCREQUEST;
                 }
                 else{
@@ -211,7 +214,6 @@ public class Host extends Thread implements Observer{
                                 e.printStackTrace();
                             }
                         }
-
 //                        for (int j = 0; j < i; j++) {
 //                            otherHosts[j] = new RequestResponse(hostAddressArrayList.get(j), Protocol.UPDATEHOSTLIST, null);
 //                            otherHosts[j].start();
@@ -223,6 +225,7 @@ public class Host extends Thread implements Observer{
                             if (!a.equals(myAddress)) {
                                 try {
                                     otherHosts[i] = new RequestResponse(a, Protocol.UPDATEHOSTLIST, null);
+                                    System.out.println("send to a");
                                     otherHosts[i].start();
                                     i++;
                                 } catch (IOException e){
@@ -242,7 +245,7 @@ public class Host extends Thread implements Observer{
                                 e.printStackTrace();
                             }
                         }
-
+                        System.out.println("wait join");
                         oOut.writeInt(Protocol.Ackowledgement);
                         oOut.flush();
                         System.out.println(hostManager);
@@ -254,7 +257,6 @@ public class Host extends Thread implements Observer{
                     case Protocol.ASKHOSTNAME:
                         oOut.writeInt(Protocol.REPLYHOSTNAME);
                         oOut.flush();
-                        System.out.println("send");
                         HostAddress temp = (HostAddress)(parameter);
                         temp.setHostName((String)oIn.readObject());
                         temp.setPublicKey((RSAPublicKey)oIn.readObject());
@@ -288,6 +290,7 @@ public class Host extends Thread implements Observer{
                         followerThread = new Thread( follower );
                         followerThread.setDaemon(true);
                         followerThread.start();
+                        System.out.println("123");
                         break;
 
                     case Protocol.RPCREQUEST:
