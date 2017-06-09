@@ -22,7 +22,7 @@ public class OnewayCommunicationPackage {
     public SignedMessage receiveFromOne() {
         this.received_Msg = new TCP_ReplyMsg_One();
 
-        this.tcp_worker = new TCP_Worker(clientSocket, this.received_Msg, null, null, JobType.receiveFromOne);
+        this.tcp_worker = new TCP_Worker(clientSocket, this.received_Msg, JobType.receiveFromOne);
         this.tcp_worker.start();
 
         // wait for receive something

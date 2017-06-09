@@ -8,10 +8,18 @@ import signedMethods.SignedMessage;
 public class TCP_ReplyMsg_One {
     private SignedMessage message;
 
+    /**
+     * Get message
+     * @return
+     */
     public SignedMessage getMessage() {
         return message;
     }
 
+    /**
+     * Set message to given message
+     * @param message
+     */
     public void setMessage(SignedMessage message) {
         this.message = message;
     }
