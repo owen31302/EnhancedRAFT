@@ -1,5 +1,6 @@
 package host;
 
+import Communicator.OnewayCommunicationPackage;
 import Communicator.TCP_Communicator;
 import signedMethods.Keys;
 import signedMethods.SignedMessage;
@@ -291,7 +292,8 @@ public class Host extends Thread implements Observer{
 
                     case Protocol.RPCREQUEST:
                         TCP_Communicator tempTCP = new TCP_Communicator(privateKey);
-                        SignedMessage receivedMSG = tempTCP.receiveFromOne(aSocket);
+                        OnewayCommunicationPackage onewayCommunicationPackage = new OnewayCommunicationPackage(aSocket);
+                        SignedMessage receivedMSG = tempTCP.receiveFromOne(onewayCommunicationPackage);
                         String RPC = receivedMSG.getMessageType();
                         HostAddress requestHost = hostManager.getHostAddress(aSocket.getInetAddress().getHostName());
                         String planText = receivedMSG.getPlanText(hostManager.getPublicKey(aSocket.getInetAddress().getHostAddress()));
@@ -306,7 +308,8 @@ public class Host extends Thread implements Observer{
                                     if (votedTerm < candidateTerm && currentTerm <= candidateTerm
                                             && stateManager.getLastIndex() <= lastLogIndex && stateManager.getLastLog().getTerm() <= lastLogTerm) {
                                         votedTerm++;
-                                        tempTCP.replyToOne(requestHost, aSocket, new SignedMessage(RPCs.REQUESTVOTE, "grant", requestHost.getPublicKey()));
+                                        SignedMessage signedMessage = new SignedMessage(RPCs.REQUESTVOTE, "grant", requestHost.getPublicKey());
+                                        tempTCP.replyToOne(onewayCommunicationPackage, signedMessage);
                                         System.out.println("grant vote");
                                     }
                                     break;
