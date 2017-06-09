@@ -15,14 +15,22 @@ public class OnewayCommunicationPackage {
     private SignedMessage reply_msg;
     private String jobType;
 
+    /**
+     * Constructor
+     * @param clientSocket socket that has connected
+     */
     public OnewayCommunicationPackage(Socket clientSocket) {
         this.clientSocket = clientSocket;
     }
 
+    /**
+     * Receive from one connected socket
+     * @return received message from this socket
+     */
     public SignedMessage receiveFromOne() {
         this.received_Msg = new TCP_ReplyMsg_One();
 
-        this.tcp_worker = new TCP_Worker(clientSocket, this.received_Msg, null, null, JobType.receiveFromOne);
+        this.tcp_worker = new TCP_Worker(clientSocket, this.received_Msg, JobType.receiveFromOne);
         this.tcp_worker.start();
 
         // wait for receive something
@@ -36,6 +44,11 @@ public class OnewayCommunicationPackage {
         return this.received_Msg.getMessage();
     }
 
+    /**
+     * Reply to one connected socket
+     * @param reply_msg message you want to send
+     * @return if message is sent succefully
+     */
     public boolean replyToOne(SignedMessage reply_msg) {
         this.tcp_worker.getTcp_ReplyMsg_One().setMessage(null); // erase it for get new reply
         this.reply_success = tcp_worker.getTcp_ReplyMsg_One();
@@ -60,21 +73,34 @@ public class OnewayCommunicationPackage {
         return this.reply_success.getMessage() != null; // if not null = sent successful
     }
 
-
-
-
+    /**
+     * Get tcp_worker
+     * @return
+     */
     public TCP_Worker getTcp_worker() {
         return tcp_worker;
     }
 
+    /**
+     * Set tcp_worker
+     * @param tcp_worker
+     */
     public void setTcp_worker(TCP_Worker tcp_worker) {
         this.tcp_worker = tcp_worker;
     }
 
+    /**
+     * Get reply_msg
+     * @return
+     */
     public SignedMessage getReply_msg() {
         return reply_msg;
     }
 
+    /**
+     * Set reply_msg
+     * @param reply_msg
+     */
     public void setReply_msg(SignedMessage reply_msg) {
         this.reply_msg = reply_msg;
     }

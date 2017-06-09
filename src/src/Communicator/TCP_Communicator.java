@@ -4,7 +4,6 @@ import host.HostAddress;
 import host.HostManager;
 import signedMethods.SignedMessage;
 
-import java.security.interfaces.RSAPrivateKey;
 import java.util.Map;
 
 /**
@@ -12,7 +11,7 @@ import java.util.Map;
  */
 public class TCP_Communicator {
 
-    public TCP_Communicator(RSAPrivateKey privateKey) {}
+    public TCP_Communicator() {}
 
     /**
      * Broadcast message to all hosts, count if replies reach majority

@@ -46,9 +46,6 @@ public class Client {
                     if(inStream.readInt() != Protocol.Ackowledgement){
                         System.out.print("ACK NOT RECEIVED\n");
                         // maybe need to try again
-                    }else {
-                        // one of the host has sent ACK
-                        //break;
                     }
                     socket.close();
                 }catch (IOException e){
@@ -108,23 +105,32 @@ public class Client {
                 // could just ctrl + C
                 break;
             }else if (Objects.equals(cmdCode, "changeValue")) {
-                while (!userInput.startsWith(" ")) {
-                    userInput = userInput.substring(1);
-                }
+                // input goes like
+                // changevalue <state name> <new value>
                 userInput.trim();
+                String[] inputParts = userInput.split(" ");
                 int newValue;
                 try {
-                    newValue = Integer.valueOf(userInput);
+                    newValue = Integer.valueOf(inputParts[2]);
                 }catch (NumberFormatException e) {
                     System.out.println("please enter a integer number");
                     continue;
                 }
+                if ((inputParts[2] == null) || Objects.equals(inputParts[2], " ")) {
+                    inputParts[2] = "default";
+                }
                 HostAddress leader = findLeader();
+                if (leader == null) {
+                    System.out.println("currently no leader");
+                    continue;
+                }
                 try{
                     Socket socket = new Socket(leader.getHostIp(), leader.getHostPort());
                     ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
                     outStream.writeChars("changeValue");
+                    outStream.flush();
+                    outStream.writeChars(inputParts[1]);
                     outStream.flush();
                     outStream.writeInt(newValue);
                     outStream.flush();
