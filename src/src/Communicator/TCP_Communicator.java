@@ -10,7 +10,6 @@ import java.util.Map;
  * Created by shan on 5/29/17.
  */
 public class TCP_Communicator {
-
     public TCP_Communicator() {}
 
     /**
@@ -21,17 +20,20 @@ public class TCP_Communicator {
      * @return if replies reach majority
      */
     public boolean initSendToAll(HostManager hostManager, TCP_ReplyMsg_All tcp_ReplyMsg_All, SignedMessage msg) {
-
+        boolean DEBUG = true;
+        if (DEBUG) System.out.println("From communicator: enter initSendToAll()");
         for (Map.Entry<String, HostAddress> a : hostManager.getHostList().entrySet()) {
             HostAddress targetHost = a.getValue();
             TCP_Worker worker = new TCP_Worker(targetHost, tcp_ReplyMsg_All, msg, targetHost.getPublicKey(), JobType.sentToAll);
             worker.start();
+            if (DEBUG) System.out.println("From communicator: worker started with " + targetHost.getHostName() + ", " + targetHost.getHostIp());
         }
         try {
             Thread.sleep(200);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        if (DEBUG) System.out.println("From communicator: 200 ms timeout, return from initSendToOne()");
         return tcp_ReplyMsg_All.getList_repliedHost().size() >= hostManager.getHostList().size() / 2 + 1;
     }
 
@@ -43,13 +45,19 @@ public class TCP_Communicator {
      * @return true if there is message; false if no reply or target node fails
      */
     public boolean initSendToOne(HostAddress targetHost, TCP_ReplyMsg_One tcp_ReplyMsg_One, SignedMessage msg) {
+        boolean DEBUG = true;
+        if (DEBUG) System.out.println("From communicator: enter initSendToOne()");
+
         TCP_Worker worker = new TCP_Worker(targetHost, tcp_ReplyMsg_One, msg, targetHost.getPublicKey(), JobType.sentToOne);
         worker.start();
+        if (DEBUG) System.out.println("From communicator: worker started with " + targetHost.getHostName() + ", " + targetHost.getHostIp());
+
         try {
             Thread.sleep(200);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        if (DEBUG) System.out.println("From communicator: 200 ms timeout, return from initSendToOne()");
         return tcp_ReplyMsg_One.getMessage() != null;
     }
 

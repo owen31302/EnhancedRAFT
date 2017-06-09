@@ -28,21 +28,28 @@ public class OnewayCommunicationPackage {
      * @return received message from this socket
      */
     public SignedMessage receiveFromOne() {
-        this.received_Msg = new TCP_ReplyMsg_One();
+        boolean DEBUG = true;
+        if (DEBUG) System.out.println("From onewayCommu: enter receiveFromOne()");
 
-        this.tcp_worker = new TCP_Worker(clientSocket, this.received_Msg, JobType.receiveFromOne);
+        this.received_Msg = new TCP_ReplyMsg_One();
+        this.tcp_worker = new TCP_Worker(this.clientSocket, this.received_Msg, JobType.receiveFromOne);
         this.tcp_worker.start();
+        if (DEBUG) System.out.println("From onewayCommu: worker started with " + this.clientSocket.getInetAddress());
 
         // wait for receive something
         synchronized (this.received_Msg) {
             while (this.received_Msg.getMessage() == null) {
+                if (DEBUG) System.out.println("From onewayCommu: no received msg yet, waiting...");
                 try {
                     this.received_Msg.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                if (DEBUG) System.out.println("From onewayCommu: got notified, check if there is msg");
             }
         }
+        if (DEBUG) System.out.println("From onewayCommu: there is msg, return from receiveFromOne()");
+
         return this.received_Msg.getMessage();
     }
 
@@ -52,6 +59,9 @@ public class OnewayCommunicationPackage {
      * @return if message is sent succefully
      */
     public boolean replyToOne(SignedMessage reply_msg) {
+        boolean DEBUG = true;
+        if (DEBUG) System.out.println("From onewayCommu: enter replyToOne()");
+
         this.tcp_worker.getTcp_ReplyMsg_One().setMessage(null); // erase it for get new reply
         this.reply_success = tcp_worker.getTcp_ReplyMsg_One();
         this.tcp_worker.setMsg(reply_msg);
@@ -62,9 +72,11 @@ public class OnewayCommunicationPackage {
         synchronized (this.jobType) {
             this.jobType.notifyAll();
         }
+        if (DEBUG) System.out.println("From onewayCommu: notify that job type is changed!");
 
         synchronized(this.reply_success) {
             while (this.reply_success.getMessage() == null) {
+                if (DEBUG) System.out.println("From onewayCommu: not sent yet, waiting...");
                 try {
                     this.reply_success.wait();
                 } catch (InterruptedException e) {
@@ -72,6 +84,7 @@ public class OnewayCommunicationPackage {
                 }
             }
         }
+        if (DEBUG) System.out.println("From onewayCommu: sent successfully, return from receiveFromOne()");
         return this.reply_success.getMessage() != null; // if not null = sent successful
     }
 

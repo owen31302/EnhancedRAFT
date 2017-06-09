@@ -72,7 +72,9 @@ public class TCP_Worker extends Thread {
      * Start running this thread
      */
     public void run() {
-        boolean DEBUG = false;
+        boolean DEBUG = true;
+        if (DEBUG) System.out.println("From TCP_worker: enter run()");
+
         openConnection();
 
         try {
@@ -89,10 +91,13 @@ public class TCP_Worker extends Thread {
      * Open connection with target host, if no connection build yet. If already connected, use connected socket.
      */
     public void openConnection() {
-        boolean DEBUG = false;
+        boolean DEBUG = true;
+        if (DEBUG) System.out.println("From TCP_worker: enter openConnection()");
+
         try {
             if (this.jobType.equals(JobType.sentToOne) || this.jobType.equals(JobType.sentToAll)) {
                 clientSocket = new Socket(target.getHostIp(), target.getHostPort());
+                if (DEBUG) System.out.println("From TCP_worker: socket is created ");
             }
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             out.flush();
@@ -103,6 +108,7 @@ public class TCP_Worker extends Thread {
             if (tcp_ReplyMsg_All != null)
                 this.tcp_ReplyMsg_All.addFailedNode(this.target); // if connection fail, record the failed node
         }
+        if (DEBUG) System.out.println("From TCP_worker: return from openConnection()");
     }
 
     /**
@@ -111,46 +117,71 @@ public class TCP_Worker extends Thread {
      * @throws ClassNotFoundException
      */
     public void handleRequest() throws IOException, ClassNotFoundException {
+        boolean DEBUG = true;
+        if (DEBUG) System.out.println("From TCP_worker: enter openConnection()");
 
         // sent to one, round trip
         if (this.jobType.equals(JobType.sentToOne)) {
+            if (DEBUG) System.out.println("From TCP_worker: jobType is " + this.jobType);
             out.writeObject(msg);
-           // out.flush();
+            if (DEBUG) System.out.println("From TCP_worker: msg is sent ");
+
+            // out.flush();
             SignedMessage replyMsg = (SignedMessage) in.readObject();
+            if (DEBUG) System.out.println("From TCP_worker: reply is received ");
             if (replyMsg.getMessageType().equals(this.msg.getMessageType())) {
                 this.tcp_ReplyMsg_One.setMessage(replyMsg);
+                if (DEBUG) System.out.println("From TCP_worker: reply message type match! ");
+
             }
             closeConnection();
+            if (DEBUG) System.out.println("From TCP_worker: return from handleRequest()");
+            return;
         }
 
         // sent to all, round trip
         if (this.jobType.equals(JobType.sentToAll)){
+            if (DEBUG) System.out.println("From TCP_worker: jobType is " + this.jobType);
             out.writeObject(msg);
-          //  out.flush();
+            if (DEBUG) System.out.println("From TCP_worker: msg is sent ");
+            //  out.flush();
             SignedMessage replyMsg = (SignedMessage) in.readObject();
+            if (DEBUG) System.out.println("From TCP_worker: reply is received ");
             if (replyMsg.getMessageType().equals(this.msg.getMessageType())) {
+                if (DEBUG) System.out.println("From TCP_worker: reply message type match ");
                 if (SignedMessage.decrypt(this.publicKey, replyMsg.getEncryptedMessageContent()).equals("Yes")) {
+                    if (DEBUG) System.out.println("From TCP_worker: reply message is \"Yes\" ");
                     this.tcp_ReplyMsg_All.addRepliedNode(this.target);
+                } else {
+                    if (DEBUG) System.out.println("From TCP_worker: reply message is \"No\" or other");
                 }
             }
             closeConnection();
+            if (DEBUG) System.out.println("From TCP_worker: return from handleRequest()");
+            return;
         }
 
         // receive from one specified client socket, one trip
 
         if (this.jobType.equals(JobType.receiveFromOne)) {
+            if (DEBUG) System.out.println("From TCP_worker: jobType is " + this.jobType);
+
             SignedMessage replyMsg = (SignedMessage) in.readObject();
             this.tcp_ReplyMsg_One.setMessage(replyMsg);
 
             synchronized (this.tcp_ReplyMsg_One) {
                 this.tcp_ReplyMsg_One.notifyAll();
+                if (DEBUG) System.out.println("From TCP_worker: notify that message is received ");
+
             }
 
             // wait for jobType to be changed to replyToOne, then send reply, one trip
             synchronized (this.jobType) {
                 while (this.msg == null) {
+                    if (DEBUG) System.out.println("From TCP_worker: no message to be sent yet, waiting...");
                     try {
                         this.jobType.wait();
+                        if (DEBUG) System.out.println("From TCP_worker: got notify job type is changed ! ");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -158,19 +189,21 @@ public class TCP_Worker extends Thread {
             }
             // reply to one specified client socket, one trip
             if (this.jobType.equals(JobType.replyToOne)) {
+                if (DEBUG) System.out.println("From TCP_worker: job type is changed to " + this.jobType);
                 out.writeObject(msg);
+                if (DEBUG) System.out.println("From TCP_worker: message is sent ");
                 this.tcp_ReplyMsg_One.setMessage(new SignedMessage("", "sent", null)); // only indicate sent
             }
 
             synchronized(this.tcp_ReplyMsg_One) {
                 this.tcp_ReplyMsg_One.notifyAll();
+                if (DEBUG) System.out.println("From TCP_worker: notify message is sent ");
             }
 
             closeConnection();
+            if (DEBUG) System.out.println("From TCP_worker: return from handleRequest()");
+            return;
         }
-
-
-
     }
 
     /**
@@ -178,6 +211,9 @@ public class TCP_Worker extends Thread {
      * @throws IOException
      */
     public void closeConnection() throws IOException {
+        boolean DEBUG = true;
+        if (DEBUG) System.out.println("From TCP_worker: enter closeConnection()");
+
         if (in != null) {
             in.close();
         }
@@ -186,6 +222,8 @@ public class TCP_Worker extends Thread {
         }
 
         this.clientSocket.close();
+        if (DEBUG) System.out.println("From TCP_worker: close successfully()");
+
     }
 
     /**
