@@ -81,7 +81,7 @@ public class TCP_Worker extends Thread {
             handleRequest();
         } catch (IOException | ClassNotFoundException e) {
             if (DEBUG)
-                System.out.println("IOexception caught");
+                System.out.println("Warning!!! IOexception caught @ handleRequest()");
             if (tcp_ReplyMsg_All != null)
                 this.tcp_ReplyMsg_All.addFailedNode(this.target); // if connection fail, record the failed node
         }
@@ -104,7 +104,7 @@ public class TCP_Worker extends Thread {
             in = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException e) {
             if (DEBUG)
-                System.out.println("IOexception caught");
+                System.out.println("Warning!!! IOexception caught @ open connection");
             if (tcp_ReplyMsg_All != null)
                 this.tcp_ReplyMsg_All.addFailedNode(this.target); // if connection fail, record the failed node
         }
