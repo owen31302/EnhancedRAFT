@@ -11,12 +11,8 @@ import java.util.Map;
  * Created by shan on 5/29/17.
  */
 public class TCP_Communicator {
-//    private RSAPrivateKey privateKey; // i think no need
 
-    public TCP_Communicator(RSAPrivateKey privateKey) {
-//        this.privateKey = privateKey;// i think no need
-
-    }
+    public TCP_Communicator(RSAPrivateKey privateKey) {}
 
     /**
      * Broadcast message to all hosts, count if replies reach majority
@@ -59,19 +55,19 @@ public class TCP_Communicator {
     }
 
     /**
-     *
-     * @param pkg
-     * @return
+     * Got a connected socket, use this method to get the message it sends.
+     * @param pkg a wrapper object to maintain one round-trip communication
+     * @return received message
      */
     public SignedMessage receiveFromOne(OnewayCommunicationPackage pkg) {
         return pkg.receiveFromOne();
     }
 
     /**
-     *
-     * @param pkg
-     * @param msg
-     * @return
+     * Send reply to whoever sends you a message before.
+     * @param pkg a wrapper object to maintain one round-trip communication, should be the same with the one used in receiveFromOne()
+     * @param msg message you want to send
+     * @return true if message send successfully
      */
     public boolean replyToOne(OnewayCommunicationPackage pkg, SignedMessage msg) {
         return pkg.replyToOne(msg);
