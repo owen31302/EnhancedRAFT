@@ -1,7 +1,10 @@
 package host;
 
 import java.net.Socket;
+import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class is used for manager all host in the cluster
@@ -106,6 +109,10 @@ public class HostManager {
         return hostList;
     }
 
+    public String[] getHostNames(){
+        return (String[]) hostList.keySet().toArray();
+    }
+
     /**
      * This method returns the name of this host
      * @return host name
@@ -144,5 +151,49 @@ public class HostManager {
      */
     public String getLeaderName(){
         return leaderAddress.getHostName();
+    }
+
+    public HostAddress getHostAddress(String hostName){
+        return hostList.get(hostName);
+    }
+
+    /**
+     * This method replaces entire host list with new host list
+     * @param newList new host list
+     */
+    public void replaceHostList(HashMap<String ,HostAddress> newList){
+        hostList = newList;
+    }
+
+    public String toString() {
+        StringBuffer result = new StringBuffer();
+        for (Map.Entry<String, HostAddress> a: hostList.entrySet()) {
+            result.append("Host Name: " + a.getValue().getHostName() + " IP:" + a.getValue().getHostIp() + "\n");
+        }
+        return result.toString();
+    }
+
+    /**
+     * This method checks if a ip, port pair in the host list
+     * @param ip ip
+     * @return true if in the host list
+     */
+    public boolean isInHostList(String ip){
+
+        for (Map.Entry<String, HostAddress> a: hostList.entrySet()) {
+            if (a.getValue().getHostIp().equals(ip)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public RSAPublicKey getPublicKey(String ip){
+        for (Map.Entry<String, HostAddress> a: hostList.entrySet()) {
+            if (a.getValue().getHostIp().equals(ip)) {
+                return a.getValue().getPublicKey();
+            }
+        }
+        return null;
     }
 }

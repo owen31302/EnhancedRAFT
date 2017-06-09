@@ -1,40 +1,55 @@
 package host;
 
 import Communicator.TCP_Communicator;
-import signedMethods.Keys;
+import Communicator.TCP_ReplyMsg_All;
 import signedMethods.SignedMessage;
-
-
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
+import java.util.Observable;
 
 /**
  * Created by owen on 5/26/17.
  */
-public class Candidate implements Runnable{
-    private double _time;
-    private final int BASELATENCY = 300;
-    private final int DURATION = 200;
+public class Candidate extends Observable implements Runnable {
     private boolean _closed = false;
+    private Host _host;
+    private TCP_ReplyMsg_All _tcp_ReplyMsg_All;
+
+    public Candidate(Host host){
+        _host = host;
+    }
 
     @Override
     public void run() {
-        String msg = "~O(∩_∩)O哈哈~";
-        String enc = "UTF-8";
-        Keys lucy = new Keys();
-        RSAPublicKey pubkey_lucy = lucy.getPublicKey();
-        RSAPrivateKey prikey_lucy = lucy.getPrivateKey();
+        boolean result = false;
+        SignedMessage signedMessage;
+        TCP_Communicator tcp_communicator = new TCP_Communicator(_host.getPrivateKey());
 
-        byte[] result = SignedMessage.encrypt(prikey_lucy, msg);
+        while (!result && !_closed){
+            _tcp_ReplyMsg_All = new TCP_ReplyMsg_All();
+            // requestVoteArray[0] = term
+            // requestVoteArray[1] = candidateId
+            // requestVoteArray[2] = lastLogIndex
+            // requestVoteArray[3] = lastLogTerm
+            String[] requestVoteArray = new String[] {
+                    _host.getCurrentTerm().toString(),
+                    _host.getHostName(),
+                    String.valueOf(_host.getStateManager().getLastLog().getIndex()),
+                    String.valueOf(_host.getStateManager().getLastLog().getTerm())
+            };
+            String requestVote = String.join(",", requestVoteArray);
+            signedMessage = new SignedMessage(RPCs.REQUESTVOTE, requestVote, _host.getPrivateKey());
+            result = tcp_communicator.sendToAll(_host.getHostManager(), _tcp_ReplyMsg_All, signedMessage);
+        }
+        if(result){
+            System.out.println("Changed!");
+            setChanged();
+            notifyObservers(CharacterManagement.C2L);
+        }
+    }
 
-        Keys keyPair = new Keys();
-        RSAPrivateKey privateKey;
-        RSAPublicKey publicKey;
-        publicKey = keyPair.getPublicKey();
-        privateKey = keyPair.getPrivateKey(); // !!!  to do : send my public key to all other hosts
-
-        SignedMessage signedMessage = new SignedMessage("Q", "Q", privateKey);
-
-        //TCP_Communicator tcp_communicator = new TCP_Communicator();
+    public void leave(){
+        _closed = true;
+    }
+    public TCP_ReplyMsg_All get_tcp_ReplyMsg_All(){
+        return _tcp_ReplyMsg_All;
     }
 }

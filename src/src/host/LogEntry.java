@@ -73,4 +73,15 @@ public class LogEntry {
         return (state.equals(anEntry.getState()) && term == anEntry.getTerm() && index == anEntry.getIndex());
     }
 
+    public String getString(){
+        String[] array = new String[] {
+                state.toString(),
+                String.valueOf(term),
+                String.valueOf(index),
+                String.valueOf(isCommitted)
+        };
+        String result = String.join(",", array);
+        return result;
+    }
+
 }

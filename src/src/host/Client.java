@@ -13,61 +13,75 @@ import java.io.IOException;
  * Created by owen on 5/26/17.
  */
 public class Client {
+    static private ArrayList<HostAddress> ServerInfos;
     static public void main(String args[]) {
-
+        // instruction goes like
+        // instruction string first
+        // corresponding content
+        // waiting for ACK
+        // if not received, we might need to send the instruction to another host
         Scanner in = new Scanner(System.in);
         String userInput;
+
         while (true) {
             System.out.print("Client => ");
             userInput = in.nextLine();
             userInput.trim();
             String cmdCode = decodeCommand(userInput);
             if (cmdCode == "add") {
-                ArrayList<HostAddress> serverInfos = addMultipleParser(userInput);
-                String[] allHostInfo = new String[serverInfos.size()];
-                // send host address to all host, unencrypted
+                ServerInfos = addMultipleParser(userInput);
+//                for (HostAddress a: ServerInfos) {
+//                    System.out.println(a.getHostName() + ";" + a.getHostIp() + ";" + a.getHostPort());
+//                }
+                //String[] allHostInfo = new String[ServerInfos.size()];
+                // send host address to one of the host, unencrypted
                 // message is String type, format goes like:
                 // instruction code
                 // host addresses count number
-                // send host information repeatedly
-                //      hostIP, hostPort
-                for (int i = 0; i < allHostInfo.length; i ++) {
-                    allHostInfo[i] = new String();
-                    allHostInfo[i] += serverInfos.get(i).getHostIp();
-                    allHostInfo[i] += ", ";
-                    allHostInfo[i] += serverInfos.get(i).getHostPort();
-                }
+                // hostIP, hostPort
+//                for (int i = 0; i < allHostInfo.length; i ++) {
+//                    allHostInfo[i] = "";
+//                    allHostInfo[i] += ServerInfos.get(i).getHostIp();
+//                    allHostInfo[i] += ", ";
+//                    allHostInfo[i] += ServerInfos.get(i).getHostPort();
+//                }
 
                 //
-                for(HostAddress s : serverInfos){
-                    try{
-                        Socket socket = new Socket(s.getHostIp(), s.getHostPort());
-                        ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
-                        ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
-                        outStream.writeChars("AddHostAddresses");
-                        outStream.flush();
-                        outStream.writeInt(allHostInfo.length);
-                        outStream.flush();
-                        for (int i = 0; i < allHostInfo.length; i ++) {
-                            outStream.writeChars(allHostInfo[i]);
-                            outStream.flush();
-                        }
-                        int waitingForACK = inStream.readInt();
-                        if(waitingForACK != ClientInstructionCode.Ackowledgement){
-                            System.out.print("ACK NOT RECEIVED\n");
-                            // maybe need to try again
-                        }
-                        socket.close();
-                    }catch (IOException e){
-                        System.out.println("Please check the server is active or key in the correct address and port.");
-                        System.out.print("Failed on server ");
-                        System.out.print(s.getHostIp());
-                        System.out.print(", port number ");
-                        System.out.print(s.getHostPort());
-                        System.out.println(".");
-                        e.printStackTrace();
+                //for(HostAddress s : ServerInfos){
+                HostAddress s = ServerInfos.get(0);
+                try{
+                    Socket socket = new Socket(s.getHostIp(), s.getHostPort());
+                    ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
+                    outStream.flush();
+                    ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
+//                    outStream.writeChars("AddHostAddresses");
+//                    outStream.flush();
+                    outStream.writeInt(Protocol.AddHostAddresses);
+                    outStream.writeObject(ServerInfos);
+//                    outStream.writeInt(allHostInfo.length);
+//                    outStream.flush();
+//                    for (int i = 0; i < allHostInfo.length; i ++) {
+//                        outStream.writeChars(allHostInfo[i]);
+//                        outStream.flush();
+//                    }
+                    if(inStream.readInt() != Protocol.Ackowledgement){
+                        System.out.print("ACK NOT RECEIVED\n");
+                        // maybe need to try again
+                    }else {
+                        // one of the host has sent ACK
+                        //break;
                     }
+                    socket.close();
+                }catch (IOException e){
+                    System.out.println("Please check the server is active or key in the correct address and port.");
+                    System.out.print("Failed on server ");
+                    System.out.print(s.getHostIp());
+                    System.out.print(", port number ");
+                    System.out.print(s.getHostPort());
+                    System.out.println(".");
+                    e.printStackTrace();
                 }
+             //   }
             }else if (cmdCode == "byzantineenable") {
                 HostAddress leader = findLeader();
                 try{
@@ -77,7 +91,7 @@ public class Client {
                     outStream.writeChars("byzantineEnable");
                     outStream.flush();
                     int waitingForACK = inStream.readInt();
-                    if(waitingForACK != ClientInstructionCode.Ackowledgement){
+                    if(waitingForACK != Protocol.Ackowledgement){
                         System.out.print("ACK NOT RECEIVED\n");
                         // maybe need to try again
                     }
@@ -95,7 +109,7 @@ public class Client {
                     outStream.writeChars("byzantineDisable");
                     outStream.flush();
                     int waitingForACK = inStream.readInt();
-                    if(waitingForACK != ClientInstructionCode.Ackowledgement){
+                    if(waitingForACK != Protocol.Ackowledgement){
                         System.out.print("ACK NOT RECEIVED\n");
                         // maybe need to try again
                     }
@@ -105,6 +119,38 @@ public class Client {
                 }
             }else if (cmdCode == "quit") {
                 // no need to do so
+                // could just ctrl + C
+                break;
+            }else if (cmdCode == "changeValue") {
+                while (!userInput.startsWith(" ")) {
+                    userInput = userInput.substring(1);
+                }
+                userInput.trim();
+                int newValue = 0;
+                try {
+                    newValue = Integer.valueOf(userInput);
+                }catch (NumberFormatException e) {
+                    System.out.println("please enter a integer number");
+                    continue;
+                }
+                HostAddress leader = findLeader();
+                try{
+                    Socket socket = new Socket(leader.getHostIp(), leader.getHostPort());
+                    ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
+                    ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
+                    outStream.writeChars("changeValue");
+                    outStream.flush();
+                    outStream.writeInt(newValue);
+                    outStream.flush();
+                    int waitingForACK = inStream.readInt();
+                    if(waitingForACK != Protocol.Ackowledgement){
+                        System.out.print("ACK NOT RECEIVED\n");
+                        // maybe need to try again
+                    }
+                    socket.close();
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
             }else {
                 System.out.println("invalid command");
             }
@@ -112,19 +158,46 @@ public class Client {
 
 
     }
-    static private HostAddress findLeader() {
-            return null;
+    private static HostAddress findLeader() {
+        // ask for leader ip and port
+        // wait for host to reply
+        HostAddress leader = null;
+        for (HostAddress s : ServerInfos) {
+
+            try {
+                Socket socket = new Socket(s.getHostIp(), s.getHostPort());
+                ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
+                ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
+                outStream.writeChars("getLeader");
+                outStream.flush();
+                Object receivedLear = inStream.readObject();
+                if (receivedLear instanceof HostAddress) {
+                    leader = (HostAddress)receivedLear;
+                }else {
+                    System.out.println("received hostaddress is not valid");
+                    return null;
+                }
+                socket.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        return leader;
     }
 
-    static private String decodeCommand(String input) {
+    private static String decodeCommand(String input) {
         if (input.length() >= 3 && input.substring(0, 3).equals("add")){
             return "add";
-        }else if ( input.length() >= "byzantineenable".length() && input.substring(0, "byzantineenable".length()).toLowerCase().equals("byzantineenable")){
+        }else if (input.length() >= "byzantineenable".length() && input.substring(0, "byzantineenable".length()).toLowerCase().equals("byzantineenable")){
             return "byzantineenable";
-        }else if ( input.length() >= "byzantinedisable".length() && input.substring(0, "byzantinedisable".length()).toLowerCase().equals("byzantinedisable")){
+        }else if (input.length() >= "byzantinedisable".length() && input.substring(0, "byzantinedisable".length()).toLowerCase().equals("byzantinedisable")){
             return "byzantinedisable";
-        }else if ( input.length() >= "quit".length() && input.substring(0, "quit".length()).equals("quit")){
+        }else if (input.length() >= "quit".length() && input.substring(0, "quit".length()).toLowerCase().equals("quit")){
             return "quit";
+        }else if (input.length() >= "changevalue".length() && input.substring(0, "changevalue".length()).toLowerCase().equals("changevalue")){
+            return "changeValue";
         }else{
             return "";
         }

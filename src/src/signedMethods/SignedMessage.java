@@ -98,4 +98,7 @@ public class SignedMessage implements Serializable {
         return encryptedMessageContent;
     }
 
+    public String getPlanText(Key k) {
+        return decrypt(k, encryptedMessageContent);
+    }
 }

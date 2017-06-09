@@ -1,6 +1,7 @@
 package Communicator;
 
 import host.HostAddress;
+import host.Protocol;
 import signedMethods.SignedMessage;
 
 import java.io.IOException;
@@ -70,6 +71,7 @@ public class TCP_Worker extends Thread {
                 clientSocket = new Socket(target.getHostIp(), target.getHostPort());
             }
             out = new ObjectOutputStream(clientSocket.getOutputStream());
+            out.flush();
             in = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException e) {
             if (DEBUG)
@@ -85,6 +87,7 @@ public class TCP_Worker extends Thread {
         // sent to one, round trip
         if (this.jobType.equals(JobType.sentToOne)) {
             out.writeObject(msg);
+           // out.flush();
             SignedMessage replyMsg = (SignedMessage) in.readObject();
             if (replyMsg.getMessageType().equals(this.msg.getMessageType())) {
                 this.tcp_ReplyMsg_One.setMessage(replyMsg);
@@ -95,6 +98,7 @@ public class TCP_Worker extends Thread {
         // sent to all, round trip
         if (this.jobType.equals(JobType.sentToAll)){
             out.writeObject(msg);
+          //  out.flush();
             SignedMessage replyMsg = (SignedMessage) in.readObject();
             if (replyMsg.getMessageType().equals(this.msg.getMessageType())) {
                 if (SignedMessage.decrypt(this.publicKey, replyMsg.getEncryptedMessageContent()).equals("Yes")) {
