@@ -19,6 +19,7 @@ public class Candidate extends Observable implements Runnable {
 
     @Override
     public void run() {
+        System.out.println("I am Candidate!");
         boolean result = false;
         SignedMessage signedMessage;
         TCP_Communicator tcp_communicator = new TCP_Communicator();

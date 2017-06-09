@@ -167,6 +167,7 @@ public class Host extends Thread implements Observer{
             RPCFlag = false;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public void run() {
             try {
@@ -294,11 +295,17 @@ public class Host extends Thread implements Observer{
                         break;
 
                     case Protocol.RPCREQUEST:
+                        System.out.println("QQ6");
                         TCP_Communicator tempTCP = new TCP_Communicator();
+                        System.out.println("QQ5");
                         OnewayCommunicationPackage onewayCommunicationPackage = new OnewayCommunicationPackage(aSocket);
+                        System.out.println("QQ4");
                         SignedMessage receivedMSG = tempTCP.receiveFromOne(onewayCommunicationPackage);
+                        System.out.println("QQ3");
                         String RPC = receivedMSG.getMessageType();
+                        System.out.println("QQ2");
                         HostAddress requestHost = hostManager.getHostAddress(aSocket.getInetAddress().getHostName());
+                        System.out.println("QQ1");
                         String planText = receivedMSG.getPlanText(hostManager.getPublicKey(aSocket.getInetAddress().getHostAddress()));
                         System.out.println("Plan text: " + planText);
                         switch (RPC) {
@@ -315,8 +322,10 @@ public class Host extends Thread implements Observer{
                                         tempTCP.replyToOne(onewayCommunicationPackage, signedMessage);
                                         System.out.println("grant vote");
                                     }
-                                    break;
                                 }
+                                break;
+                            case RPCs.APPENDENTRY:
+                                break;
                         }
                         break;
                 }
@@ -332,10 +341,10 @@ public class Host extends Thread implements Observer{
                 if (!aSocket.isClosed()) {
                     aSocket.close();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
+            } catch (IOException e1) {
+                e1.printStackTrace();
             }
 
         }
