@@ -1,6 +1,7 @@
 package host;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Scanner;
 import java.net.Socket;
 import java.util.regex.Matcher;
@@ -13,7 +14,7 @@ import java.io.IOException;
  * Created by owen on 5/26/17.
  */
 public class Client {
-    static private ArrayList<HostAddress> ServerInfos;
+    static private ArrayList<HostAddress> serverInfos;
     static public void main(String args[]) {
         // instruction goes like
         // instruction string first
@@ -28,42 +29,20 @@ public class Client {
             userInput = in.nextLine();
             userInput.trim();
             String cmdCode = decodeCommand(userInput);
-            if (cmdCode == "add") {
-                ServerInfos = addMultipleParser(userInput);
-//                for (HostAddress a: ServerInfos) {
-//                    System.out.println(a.getHostName() + ";" + a.getHostIp() + ";" + a.getHostPort());
-//                }
-                //String[] allHostInfo = new String[ServerInfos.size()];
-                // send host address to one of the host, unencrypted
-                // message is String type, format goes like:
-                // instruction code
-                // host addresses count number
-                // hostIP, hostPort
-//                for (int i = 0; i < allHostInfo.length; i ++) {
-//                    allHostInfo[i] = "";
-//                    allHostInfo[i] += ServerInfos.get(i).getHostIp();
-//                    allHostInfo[i] += ", ";
-//                    allHostInfo[i] += ServerInfos.get(i).getHostPort();
-//                }
-
-                //
-                //for(HostAddress s : ServerInfos){
-                HostAddress s = ServerInfos.get(0);
+            if (Objects.equals(cmdCode, "add")) {
+                serverInfos = addMultipleParser(userInput);
+                if (serverInfos.isEmpty()) {
+                    System.out.println("no host has added");
+                    continue;
+                }
+                HostAddress s = serverInfos.get(0);
                 try{
                     Socket socket = new Socket(s.getHostIp(), s.getHostPort());
                     ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
                     outStream.flush();
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
-//                    outStream.writeChars("AddHostAddresses");
-//                    outStream.flush();
                     outStream.writeInt(Protocol.AddHostAddresses);
-                    outStream.writeObject(ServerInfos);
-//                    outStream.writeInt(allHostInfo.length);
-//                    outStream.flush();
-//                    for (int i = 0; i < allHostInfo.length; i ++) {
-//                        outStream.writeChars(allHostInfo[i]);
-//                        outStream.flush();
-//                    }
+                    outStream.writeObject(serverInfos);
                     if(inStream.readInt() != Protocol.Ackowledgement){
                         System.out.print("ACK NOT RECEIVED\n");
                         // maybe need to try again
@@ -79,11 +58,14 @@ public class Client {
                     System.out.print(", port number ");
                     System.out.print(s.getHostPort());
                     System.out.println(".");
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
-             //   }
-            }else if (cmdCode == "byzantineenable") {
+            }else if (Objects.equals(cmdCode, "byzantineenable")) {
                 HostAddress leader = findLeader();
+                if (leader == null) {
+                    System.out.println("currently no leader");
+                    continue;
+                }
                 try{
                     Socket socket = new Socket(leader.getHostIp(), leader.getHostPort());
                     ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
@@ -100,8 +82,12 @@ public class Client {
                     e.printStackTrace();
                 }
 
-            }else if (cmdCode == "byzantinedisable") {
+            }else if (Objects.equals(cmdCode, "byzantinedisable")) {
                 HostAddress leader = findLeader();
+                if (leader == null) {
+                    System.out.println("currently no leader");
+                    continue;
+                }
                 try{
                     Socket socket = new Socket(leader.getHostIp(), leader.getHostPort());
                     ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
@@ -117,16 +103,16 @@ public class Client {
                 }catch (IOException e){
                     e.printStackTrace();
                 }
-            }else if (cmdCode == "quit") {
-                // no need to do so
+            }else if (Objects.equals(cmdCode, "quit")) {
+                // no need to do this
                 // could just ctrl + C
                 break;
-            }else if (cmdCode == "changeValue") {
+            }else if (Objects.equals(cmdCode, "changeValue")) {
                 while (!userInput.startsWith(" ")) {
                     userInput = userInput.substring(1);
                 }
                 userInput.trim();
-                int newValue = 0;
+                int newValue;
                 try {
                     newValue = Integer.valueOf(userInput);
                 }catch (NumberFormatException e) {
@@ -162,7 +148,10 @@ public class Client {
         // ask for leader ip and port
         // wait for host to reply
         HostAddress leader = null;
-        for (HostAddress s : ServerInfos) {
+        if ((serverInfos == null) || serverInfos.isEmpty()) {
+            return null;
+        }
+        for (HostAddress s : serverInfos) {
 
             try {
                 Socket socket = new Socket(s.getHostIp(), s.getHostPort());
@@ -171,19 +160,17 @@ public class Client {
                 outStream.writeChars("getLeader");
                 outStream.flush();
                 Object receivedLear = inStream.readObject();
+                socket.close();
                 if (receivedLear instanceof HostAddress) {
                     leader = (HostAddress)receivedLear;
+                    break;
                 }else {
                     System.out.println("received hostaddress is not valid");
-                    return null;
                 }
-                socket.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
-
         return leader;
     }
 
@@ -204,13 +191,13 @@ public class Client {
     }
 
     private static ArrayList<HostAddress> addMultipleParser(String str){
-        ArrayList<String> matches = new ArrayList<String>();
+        ArrayList<String> matches = new ArrayList<>();
         Matcher m = Pattern.compile("\\((.*?)\\)").matcher(str);
         while(m.find()) {
             matches.add(m.group(1));
         }
 
-        ArrayList<HostAddress> result = new ArrayList<HostAddress>();
+        ArrayList<HostAddress> result = new ArrayList<>();
         StringBuilder ip;
         StringBuilder port;
         for(String s : matches){
@@ -225,22 +212,17 @@ public class Client {
 
     private static boolean addParser(String s, StringBuilder ip, StringBuilder port){
         String[] partsOfOneBlock = s.split(",");
-
         for(int i = 0; i<partsOfOneBlock.length; i++){
             partsOfOneBlock[i] = partsOfOneBlock[i].trim();
         }
-
         // check three parts
         // check ip addr format
         // check port range
-        if(partsOfOneBlock.length == 3){
-
-            String[] ipBlock = partsOfOneBlock[1].split("\\.");
+        if(partsOfOneBlock.length == 2){
+            String[] ipBlock = partsOfOneBlock[0].split("\\.");
             for(int i = 0; i < ipBlock.length; i++){
                 ipBlock[i] = ipBlock[i].trim();
             }
-
-
             if(ipBlock.length != 4){
                 System.out.print("Please key in the correct format xxx.xxx.xxx.xxx .\n");
                 return false;
@@ -252,19 +234,18 @@ public class Client {
                 }
             }
 
-            int portNumber = Integer.parseInt(partsOfOneBlock[2]);
+            int portNumber = Integer.parseInt(partsOfOneBlock[1]);
             if(!(portNumber >= 1024 && portNumber <= 65535)){
                 System.out.print("You have to set port within 1024 to 65535.\n");
                 return false;
             }
-
             ip.delete(0, ip.length());
-            ip.append(partsOfOneBlock[1]);
+            ip.append(partsOfOneBlock[0]);
             port.delete(0, port.length());
-            port.append(partsOfOneBlock[2]);
+            port.append(partsOfOneBlock[1]);
             return true;
         }else{
-            System.out.print("Please key in the correct format add(hostname, ip, port).\n");
+            System.out.print("Please enter in the correct format add(ip, port).\n");
         }
         return false;
     }
