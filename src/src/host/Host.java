@@ -291,7 +291,7 @@ public class Host extends Thread implements Observer{
                         break;
 
                     case Protocol.RPCREQUEST:
-                        TCP_Communicator tempTCP = new TCP_Communicator(privateKey);
+                        TCP_Communicator tempTCP = new TCP_Communicator();
                         OnewayCommunicationPackage onewayCommunicationPackage = new OnewayCommunicationPackage(aSocket);
                         SignedMessage receivedMSG = tempTCP.receiveFromOne(onewayCommunicationPackage);
                         String RPC = receivedMSG.getMessageType();
