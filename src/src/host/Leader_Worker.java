@@ -22,7 +22,7 @@ public class Leader_Worker implements Runnable {
     @Override
     public void run() {
         SignedMessage signedMessage;
-        TCP_Communicator tcp_communicator = new TCP_Communicator(_leader.get_host().getPrivateKey());
+        TCP_Communicator tcp_communicator = new TCP_Communicator();
         TCP_ReplyMsg_One tcp_replyMsg_one = new TCP_ReplyMsg_One();
         int index;
         LogEntry logEntry;
@@ -34,7 +34,7 @@ public class Leader_Worker implements Runnable {
                 index = _leader.get_nextIndex().get(_hostName);
                 logEntry = _leader.get_host().getStateManager().getLog(index);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, logEntry.getString(), _leader.get_host().getPrivateKey());
-                result = tcp_communicator.sendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
+                result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
                 if(result){
                     _leader.get_findNextIndex().add(_hostName);
                 }else{
@@ -47,11 +47,11 @@ public class Leader_Worker implements Runnable {
                 index = _leader.get_nextIndex().get(_hostName);
                 logEntry = _leader.get_host().getStateManager().getLog(index);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, logEntry.getString(), _leader.get_host().getPrivateKey());
-                result = tcp_communicator.sendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
+                result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
                 if(result){
                     // commit
                     signedMessage = new SignedMessage(RPCs.COMMITENTRY, logEntry.getString(), _leader.get_host().getPrivateKey());
-                    result = tcp_communicator.sendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
+                    result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
                     if(result){
                         int nextIndex = _leader.get_nextIndex().get(_hostName);
                         _leader.get_nextIndex().put(_hostName, nextIndex+1);
@@ -64,7 +64,7 @@ public class Leader_Worker implements Runnable {
                 index = _leader.get_host().getCommitIndex()+1;
                 logEntry = _leader.get_host().getStateManager().getLog(index);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, logEntry.getString(), _leader.get_host().getPrivateKey());
-                result = tcp_communicator.sendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
+                result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
                 if(result){
                     _leader.set_votes();
                 }
@@ -72,7 +72,7 @@ public class Leader_Worker implements Runnable {
             case LeaderJobs.HEARTBEAT:
                 // 如果沒新東西就heartbeat
                 signedMessage = new SignedMessage(RPCs.HEARTBEAT, "", _leader.get_host().getPrivateKey());
-                tcp_communicator.sendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
+                tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
                 break;
         }
     }

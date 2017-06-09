@@ -41,7 +41,7 @@ public class Leader extends Observable implements Runnable {
         // (1), (2), (3) will happen concurrently.
 
         SignedMessage signedMessage;
-        TCP_Communicator tcp_communicator = new TCP_Communicator(_host.getPrivateKey());
+        TCP_Communicator tcp_communicator = new TCP_Communicator();
         while (!_closed){
             _votes = 0;
             HashMap<String, Thread> threads = new HashMap<>();

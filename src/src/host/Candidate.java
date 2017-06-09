@@ -21,7 +21,7 @@ public class Candidate extends Observable implements Runnable {
     public void run() {
         boolean result = false;
         SignedMessage signedMessage;
-        TCP_Communicator tcp_communicator = new TCP_Communicator(_host.getPrivateKey());
+        TCP_Communicator tcp_communicator = new TCP_Communicator();
 
         while (!result && !_closed){
             _tcp_ReplyMsg_All = new TCP_ReplyMsg_All();
