@@ -14,6 +14,7 @@ public class OnewayCommunicationPackage {
     private TCP_ReplyMsg_One received_Msg;
     private SignedMessage reply_msg;
     private String jobType;
+    private boolean global_DEBUG = false;
 
     /**
      * Constructor
@@ -28,7 +29,8 @@ public class OnewayCommunicationPackage {
      * @return received message from this socket
      */
     public SignedMessage receiveFromOne() {
-        boolean DEBUG = false;
+        boolean local_DEBUG = true;
+        boolean DEBUG = global_DEBUG? local_DEBUG: global_DEBUG;
         if (DEBUG) System.out.println("From onewayCommu: enter receiveFromOne()");
 
         this.received_Msg = new TCP_ReplyMsg_One();
@@ -59,7 +61,8 @@ public class OnewayCommunicationPackage {
      * @return if message is sent succefully
      */
     public boolean replyToOne(SignedMessage reply_msg) {
-        boolean DEBUG = false;
+        boolean local_DEBUG = true;
+        boolean DEBUG = global_DEBUG? local_DEBUG: global_DEBUG;
         if (DEBUG) System.out.println("From onewayCommu: enter replyToOne()");
 
         this.tcp_worker.getTcp_ReplyMsg_One().setMessage(null); // erase it for get new reply

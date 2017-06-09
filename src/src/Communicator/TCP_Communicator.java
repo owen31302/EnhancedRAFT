@@ -10,6 +10,8 @@ import java.util.Map;
  * Created by shan on 5/29/17.
  */
 public class TCP_Communicator {
+    private boolean global_DEBUG = false;
+
     public TCP_Communicator() {}
 
     /**
@@ -20,7 +22,8 @@ public class TCP_Communicator {
      * @return if replies reach majority
      */
     public boolean initSendToAll(HostManager hostManager, TCP_ReplyMsg_All tcp_ReplyMsg_All, SignedMessage msg) {
-        boolean DEBUG = false;
+        boolean local_DEBUG = true;
+        boolean DEBUG = global_DEBUG? (local_DEBUG): global_DEBUG;
         if (DEBUG) System.out.println("From communicator: enter initSendToAll()");
         for (Map.Entry<String, HostAddress> a : hostManager.getHostList().entrySet()) {
             HostAddress targetHost = a.getValue();
@@ -45,7 +48,8 @@ public class TCP_Communicator {
      * @return true if there is message; false if no reply or target node fails
      */
     public boolean initSendToOne(HostAddress targetHost, TCP_ReplyMsg_One tcp_ReplyMsg_One, SignedMessage msg) {
-        boolean DEBUG = false;
+        boolean local_DEBUG = true;
+        boolean DEBUG = global_DEBUG? (local_DEBUG): global_DEBUG;
         if (DEBUG) System.out.println("From communicator: enter initSendToOne()");
 
         TCP_Worker worker = new TCP_Worker(targetHost, tcp_ReplyMsg_One, msg, targetHost.getPublicKey(), JobType.sentToOne);

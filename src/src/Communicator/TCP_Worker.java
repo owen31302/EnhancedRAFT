@@ -23,6 +23,8 @@ public class TCP_Worker extends Thread {
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
+    private boolean global_DEBUG = false;
+
     /**
      * Constructor for initSendToAll() in Communicator
      * @param target specific host you want to build connection
@@ -72,7 +74,8 @@ public class TCP_Worker extends Thread {
      * Start running this thread
      */
     public void run() {
-        boolean DEBUG = false;
+        boolean local_DEBUG = true;
+        boolean DEBUG = global_DEBUG? (local_DEBUG): global_DEBUG;
         if (DEBUG) System.out.println("From TCP_worker: enter run()");
 
         openConnection();
@@ -91,7 +94,8 @@ public class TCP_Worker extends Thread {
      * Open connection with target host, if no connection build yet. If already connected, use connected socket.
      */
     public void openConnection() {
-        boolean DEBUG = false;
+        boolean local_DEBUG = true;
+        boolean DEBUG = global_DEBUG? (local_DEBUG): global_DEBUG;
         if (DEBUG) System.out.println("From TCP_worker: enter openConnection()");
 
         try {
@@ -117,7 +121,8 @@ public class TCP_Worker extends Thread {
      * @throws ClassNotFoundException
      */
     public void handleRequest() throws IOException, ClassNotFoundException {
-        boolean DEBUG = false;
+        boolean local_DEBUG = true;
+        boolean DEBUG = global_DEBUG? (local_DEBUG): global_DEBUG;
         if (DEBUG) System.out.println("From TCP_worker: enter openConnection()");
 
         // sent to one, round trip
@@ -213,7 +218,8 @@ public class TCP_Worker extends Thread {
      * @throws IOException
      */
     public void closeConnection() throws IOException {
-        boolean DEBUG = false;
+        boolean local_DEBUG = true;
+        boolean DEBUG = global_DEBUG? (local_DEBUG): global_DEBUG;
         if (DEBUG) System.out.println("From TCP_worker: enter closeConnection()");
 
         if (in != null) {
