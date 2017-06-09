@@ -34,11 +34,13 @@ public class OnewayCommunicationPackage {
         this.tcp_worker.start();
 
         // wait for receive something
-        while (this.received_Msg.getMessage() == null) {
-            try {
-                this.received_Msg.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        synchronized (this.received_Msg) {
+            while (this.received_Msg.getMessage() == null) {
+                try {
+                    this.received_Msg.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return this.received_Msg.getMessage();
