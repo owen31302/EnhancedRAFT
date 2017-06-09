@@ -22,7 +22,7 @@ public class Follower extends Observable implements Runnable {
 
     @Override
     public void run() {
-        //System.out.println("Time: " + _time);
+        System.out.println("I am Follower!");
         long startTime = System.currentTimeMillis();
         while(_time>0){
             long endTime   = System.currentTimeMillis();
