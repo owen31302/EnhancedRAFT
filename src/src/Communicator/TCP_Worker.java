@@ -1,7 +1,6 @@
 package Communicator;
 
 import host.HostAddress;
-import host.Protocol;
 import signedMethods.SignedMessage;
 
 import java.io.IOException;
@@ -20,7 +19,6 @@ public class TCP_Worker extends Thread {
     private TCP_ReplyMsg_One tcp_ReplyMsg_One;
     private RSAPublicKey publicKey;
     private String jobType;
-
     private SignedMessage msg;
     private ObjectInputStream in;
     private ObjectOutputStream out;
@@ -109,19 +107,40 @@ public class TCP_Worker extends Thread {
         }
 
         // receive from one specified client socket, one trip
+
         if (this.jobType.equals(JobType.receiveFromOne)) {
             SignedMessage replyMsg = (SignedMessage) in.readObject();
             this.tcp_ReplyMsg_One.setMessage(replyMsg);
-            // Note: No need to close connection now, because you need to send back later.
-            // After you send back, connection will be closed
-        }
 
-        // reply to one specified client socket, one trip
-        if (this.jobType.equals(JobType.replyToOne)) {
-            out.writeObject(msg);
-            this.tcp_ReplyMsg_One.setMessage(new SignedMessage("", "sent", this.publicKey)); // only indicate sent
+            synchronized (this.tcp_ReplyMsg_One) {
+                this.tcp_ReplyMsg_One.notifyAll();
+            }
+
+            // wait for jobType to be changed to replyToOne, then send reply, one trip
+            synchronized (this.jobType) {
+                while (this.msg == null) {
+                    try {
+                        this.jobType.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            // reply to one specified client socket, one trip
+            if (this.jobType.equals(JobType.replyToOne)) {
+                out.writeObject(msg);
+                this.tcp_ReplyMsg_One.setMessage(new SignedMessage("", "sent", null)); // only indicate sent
+            }
+
+            synchronized(this.tcp_ReplyMsg_One) {
+                this.tcp_ReplyMsg_One.notifyAll();
+            }
+
             closeConnection();
         }
+
+
+
     }
 
     public void closeConnection() throws IOException {
@@ -133,5 +152,27 @@ public class TCP_Worker extends Thread {
         }
 
         this.clientSocket.close();
+    }
+
+    public String getJobType() {
+        return jobType;
+    }
+
+    public void setJobType(String jobType) {
+        this.jobType = jobType;
+    }
+    public SignedMessage getMsg() {
+        return msg;
+    }
+
+    public void setMsg(SignedMessage msg) {
+        this.msg = msg;
+    }
+    public TCP_ReplyMsg_One getTcp_ReplyMsg_One() {
+        return tcp_ReplyMsg_One;
+    }
+
+    public void setTcp_ReplyMsg_One(TCP_ReplyMsg_One tcp_ReplyMsg_One) {
+        this.tcp_ReplyMsg_One = tcp_ReplyMsg_One;
     }
 }

@@ -4,7 +4,6 @@ import host.HostAddress;
 import host.HostManager;
 import signedMethods.SignedMessage;
 
-import java.net.Socket;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.Map;
 
@@ -26,7 +25,7 @@ public class TCP_Communicator {
      * @param msg message to be sent to all hosts
      * @return if replies reach majority
      */
-    public boolean sendToAll(HostManager hostManager, TCP_ReplyMsg_All tcp_ReplyMsg_All, SignedMessage msg) {
+    public boolean initSendToAll(HostManager hostManager, TCP_ReplyMsg_All tcp_ReplyMsg_All, SignedMessage msg) {
 
         for (Map.Entry<String, HostAddress> a : hostManager.getHostList().entrySet()) {
             HostAddress targetHost = a.getValue();
@@ -48,7 +47,7 @@ public class TCP_Communicator {
      * @param msg message to be sent to target host
      * @return true if there is message; false if no reply or target node fails
      */
-    public boolean sendToOne(HostAddress targetHost, TCP_ReplyMsg_One tcp_ReplyMsg_One, SignedMessage msg) {
+    public boolean initSendToOne(HostAddress targetHost, TCP_ReplyMsg_One tcp_ReplyMsg_One, SignedMessage msg) {
         TCP_Worker worker = new TCP_Worker(targetHost, tcp_ReplyMsg_One, msg, targetHost.getPublicKey(), JobType.sentToOne);
         worker.start();
         try {
@@ -61,35 +60,24 @@ public class TCP_Communicator {
 
     /**
      *
-     * @param clientSocket
+     * @param pkg
+     * @return
+     */
+    public SignedMessage receiveFromOne(OnewayCommunicationPackage pkg) {
+        return pkg.receiveFromOne();
+    }
+
+    /**
+     *
+     * @param pkg
      * @param msg
      * @return
      */
-    public boolean replyToOne(HostAddress targetHost, Socket clientSocket, SignedMessage msg) {
-
-        TCP_ReplyMsg_One tcp_sent_success = new TCP_ReplyMsg_One();// only for checking if sent successfully, not for expecting reply
-        TCP_Worker worker = new TCP_Worker(clientSocket, tcp_sent_success, msg, targetHost.getPublicKey(), JobType.replyToOne);
-        worker.start();
-        try {
-            worker.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return tcp_sent_success.getMessage() != null; // if not null = sent successful
+    public boolean replyToOne(OnewayCommunicationPackage pkg, SignedMessage msg) {
+        return pkg.replyToOne(msg);
     }
 
 
-    public SignedMessage receiveFromOne(Socket clientSocket) {
-        TCP_ReplyMsg_One receivedMsg = new TCP_ReplyMsg_One();
-        TCP_Worker worker = new TCP_Worker(clientSocket, receivedMsg, null, null, JobType.receiveFromOne);
-        worker.start();
-        try {
-            worker.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return receivedMsg.getMessage();
-    }
 
 
 }
