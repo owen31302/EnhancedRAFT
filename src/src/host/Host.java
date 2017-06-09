@@ -90,6 +90,7 @@ public class Host extends Thread implements Observer{
                 candidateThread.start();
                 break;
             case CharacterManagement.C2L:
+                System.out.println("Change from Candidate to Leader.");
                 candidate.leave();
                 charactor = CharacterManagement.LEADER;
                 // leader should take care of non-up-to-date followers.
@@ -295,17 +296,17 @@ public class Host extends Thread implements Observer{
                         break;
 
                     case Protocol.RPCREQUEST:
-                        System.out.println("QQ6");
+                        //System.out.println("QQ6");
                         TCP_Communicator tempTCP = new TCP_Communicator();
-                        System.out.println("QQ5");
+                        //System.out.println("QQ5");
                         OnewayCommunicationPackage onewayCommunicationPackage = new OnewayCommunicationPackage(aSocket);
-                        System.out.println("QQ4");
+                        //System.out.println("QQ4");
                         SignedMessage receivedMSG = tempTCP.receiveFromOne(onewayCommunicationPackage);
-                        System.out.println("QQ3");
+                        //System.out.println("QQ3");
                         String RPC = receivedMSG.getMessageType();
-                        System.out.println("QQ2");
+                        //System.out.println("QQ2");
                         HostAddress requestHost = hostManager.getHostAddress(aSocket.getInetAddress().getHostName());
-                        System.out.println("QQ1");
+                        //System.out.println("QQ1");
                         String planText = receivedMSG.getPlanText(hostManager.getPublicKey(aSocket.getInetAddress().getHostAddress()));
                         System.out.println("Plan text: " + planText);
                         switch (RPC) {
