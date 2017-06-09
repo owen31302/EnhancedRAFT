@@ -18,6 +18,7 @@ public class SignedMessage implements Serializable {
     private String messageType;
     private byte[] encryptedMessageContent;
 
+
     public SignedMessage(String messageType, String message, Key key) {
         this.messageType = messageType;
         this.encryptedMessageContent = encrypt(key, message);
