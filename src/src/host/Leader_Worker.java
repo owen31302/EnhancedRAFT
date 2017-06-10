@@ -81,7 +81,15 @@ public class Leader_Worker implements Runnable {
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
                 if(result){
-                    _leader.get_nextIndex().put(_hostName, index+1);
+                    if (tcp_replyMsg_one.getMessage().equals(RPCs.SUCCESS)) {
+                        System.out.println("RPCs.SUCCESS");
+                        _leader.get_nextIndex().put(_hostName, index+1);
+                    }else if(tcp_replyMsg_one.getMessage().equals(RPCs.FAIL)){
+                        System.out.println("RPCs.FAIL");
+                        _leader.get_isFindNextIndex().remove(_hostName);
+                    }else{
+                        System.out.println("Some error.");
+                    }
                 }
                 break;
             case LeaderJobs.APPENDLOG:
@@ -98,7 +106,16 @@ public class Leader_Worker implements Runnable {
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
                 if(result){
-                    _leader.set_votes();
+                    if (tcp_replyMsg_one.getMessage().equals(RPCs.SUCCESS)) {
+                        System.out.println("RPCs.SUCCESS");
+                        _leader.set_votes();
+                    }else if(tcp_replyMsg_one.getMessage().equals(RPCs.FAIL)){
+                        System.out.println("RPCs.FAIL");
+                        _leader.get_isFindNextIndex().remove(_hostName);
+                    }else{
+                        System.out.println("Some error.");
+                    }
+
                 }
                 break;
             case LeaderJobs.HEARTBEAT:
@@ -106,7 +123,17 @@ public class Leader_Worker implements Runnable {
                 // 如果沒新東西就heartbeat
                 appendEntry = String.join(",", appendEntryArray);
                 signedMessage = new SignedMessage(RPCs.HEARTBEAT, appendEntry, _leader.get_host().getPrivateKey());
-                tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
+                result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
+                if(result){
+                    if (tcp_replyMsg_one.getMessage().equals(RPCs.SUCCESS)) {
+                        System.out.println("RPCs.SUCCESS");
+                    }else if(tcp_replyMsg_one.getMessage().equals(RPCs.FAIL)){
+                        System.out.println("RPCs.FAIL");
+                        _leader.get_isFindNextIndex().remove(_hostName);
+                    }else{
+                        System.out.println("Some error.");
+                    }
+                }
                 break;
         }
     }
