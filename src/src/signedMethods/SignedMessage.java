@@ -107,7 +107,7 @@ public class SignedMessage implements Serializable {
     }
 
     /**
-     *
+     * Get encrypted message content
      * @return
      */
     private byte[] getEncryptedMessageContent() {
@@ -115,7 +115,7 @@ public class SignedMessage implements Serializable {
     }
 
     /**
-     *
+     * Get plan text
      * @param k
      * @return
      */
