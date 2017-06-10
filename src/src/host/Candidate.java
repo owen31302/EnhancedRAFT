@@ -39,6 +39,7 @@ public class Candidate extends Observable implements Runnable {
             String requestVote = String.join(",", requestVoteArray);
             signedMessage = new SignedMessage(RPCs.REQUESTVOTE, requestVote, _host.getPrivateKey());
             result = tcp_communicator.initSendToAll(_host.getHostManager(), _tcp_ReplyMsg_All, signedMessage);
+            System.out.println(result);
         }
         if(result){
             System.out.println("Changed!");

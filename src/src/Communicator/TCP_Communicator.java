@@ -30,6 +30,11 @@ public class TCP_Communicator {
             TCP_Worker worker = new TCP_Worker(targetHost, tcp_ReplyMsg_All, msg, targetHost.getPublicKey(), JobType.sentToAll);
             worker.start();
             if (DEBUG) System.out.println("From communicator: worker started with " + targetHost.getHostName() + ", " + targetHost.getHostIp());
+            try {
+                worker.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         try {
             Thread.sleep(200);

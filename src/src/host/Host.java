@@ -291,7 +291,7 @@ public class Host extends Thread implements Observer{
                         System.out.println(hostManager);
                         followerThread = new Thread( follower );
                         followerThread.setDaemon(true);
-                        followerThread.start();
+                        //followerThread.start();
                         System.out.println("123");
                         break;
 
@@ -319,7 +319,8 @@ public class Host extends Thread implements Observer{
                                     if (votedTerm < candidateTerm && currentTerm <= candidateTerm
                                             && stateManager.getLastIndex() <= lastLogIndex && stateManager.getLastLog().getTerm() <= lastLogTerm) {
                                         votedTerm++;
-                                        SignedMessage signedMessage = new SignedMessage(RPCs.REQUESTVOTE, "grant", privateKey);
+                                        SignedMessage signedMessage = new SignedMessage(RPCs.REQUESTVOTE, "Yes", privateKey);
+                                        System.out.println("aaa");
                                         tempTCP.replyToOne(onewayCommunicationPackage, signedMessage);
                                         System.out.println("grant vote");
                                     }
