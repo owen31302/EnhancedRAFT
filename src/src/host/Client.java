@@ -40,10 +40,12 @@ public class Client {
                     Socket socket = new Socket(s.getHostIp(), s.getHostPort());
                     ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
                     outStream.flush();
-                    ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
-                    outStream.writeInt(Protocol.AddHostAddresses);
+                    outStream.writeInt(Protocol.ADDHOSTADDRESS);
+                    outStream.flush();
                     outStream.writeObject(serverInfos);
-                    if(inStream.readInt() != Protocol.Ackowledgement){
+                    outStream.flush();
+                    ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
+                    if(inStream.readInt() != Protocol.ACKOWLEDGEMENT){
                         System.out.print("ACK NOT RECEIVED\n");
                         // maybe need to try again
                     }
@@ -70,7 +72,7 @@ public class Client {
                     outStream.writeChars("byzantineEnable");
                     outStream.flush();
                     int waitingForACK = inStream.readInt();
-                    if(waitingForACK != Protocol.Ackowledgement){
+                    if(waitingForACK != Protocol.ACKOWLEDGEMENT){
                         System.out.print("ACK NOT RECEIVED\n");
                         // maybe need to try again
                     }
@@ -92,7 +94,7 @@ public class Client {
                     outStream.writeChars("byzantineDisable");
                     outStream.flush();
                     int waitingForACK = inStream.readInt();
-                    if(waitingForACK != Protocol.Ackowledgement){
+                    if(waitingForACK != Protocol.ACKOWLEDGEMENT){
                         System.out.print("ACK NOT RECEIVED\n");
                         // maybe need to try again
                     }
@@ -128,14 +130,14 @@ public class Client {
                     Socket socket = new Socket(leader.getHostIp(), leader.getHostPort());
                     ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
-                    outStream.writeChars("changeValue");
+                    outStream.writeInt(Protocol.CHANGEVALUE);
                     outStream.flush();
                     outStream.writeChars(inputParts[1]);
                     outStream.flush();
                     outStream.writeInt(newValue);
                     outStream.flush();
                     int waitingForACK = inStream.readInt();
-                    if(waitingForACK != Protocol.Ackowledgement){
+                    if(waitingForACK != Protocol.ACKOWLEDGEMENT){
                         System.out.print("ACK NOT RECEIVED\n");
                         // maybe need to try again
                     }
@@ -154,27 +156,45 @@ public class Client {
         // ask for leader ip and port
         // wait for host to reply
         HostAddress leader = null;
+        String receivedLear = null;
         if ((serverInfos == null) || serverInfos.isEmpty()) {
             return null;
         }
         for (HostAddress s : serverInfos) {
-
+            Socket socket = null;
             try {
-                Socket socket = new Socket(s.getHostIp(), s.getHostPort());
+                socket = new Socket(s.getHostIp(), s.getHostPort());
+            } catch (IOException e) {
+                System.out.println("can not set up socket");
+                continue;
+            }
+            try {
                 ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
-                outStream.writeChars("getLeader");
+                outStream.writeInt(Protocol.REQUESTLEADERADDRESS);
                 outStream.flush();
-                Object receivedLear = inStream.readObject();
+                receivedLear = (String)inStream.readObject();
                 socket.close();
-                if (receivedLear instanceof HostAddress) {
-                    leader = (HostAddress)receivedLear;
-                    break;
-                }else {
-                    System.out.println("received hostaddress is not valid");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+                // success get a leader
+                break;
+            } catch (IOException e) {
+                // request timeout
+                System.out.print("request to ");
+                System.out.print(s.getHostIp());
+                System.out.println(" timeout");
+            }catch (ClassNotFoundException e) {
+                System.out.println("received a invalid string object");
+            }
+
+        }
+        if (receivedLear == null) {
+            System.out.println("cant find a leader");
+            return null;
+        }
+        for (HostAddress s: serverInfos) {
+            if (Objects.equals(s.getHostIp(), receivedLear)) {
+                leader = s;
+                break;
             }
         }
         return leader;
