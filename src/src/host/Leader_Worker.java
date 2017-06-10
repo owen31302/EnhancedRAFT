@@ -32,6 +32,7 @@ public class Leader_Worker implements Runnable {
                 // new 一個thread，然後去append看看是否成功，如果成功代表我找到相同位置
                 // 沒有成功，index要decrement，然後再試一次
                 index = _leader.get_nextIndex().get(_hostName);
+                System.out.println("host name:" + _hostName);
                 logEntry = _leader.get_host().getStateManager().getLog(index);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, logEntry.getString(), _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);

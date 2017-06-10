@@ -4,10 +4,7 @@ import Communicator.TCP_Communicator;
 import Communicator.TCP_ReplyMsg_All;
 import signedMethods.SignedMessage;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Observable;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by TC_Yeh on 5/26/2017.
@@ -27,8 +24,8 @@ public class Leader extends Observable implements Runnable {
         int lastIndex = _host.getCommitIndex();
         _hostnames = _host.getHostManager().getHostNames();
         _nextIndex = new HashMap<>();
+        _findNextIndex = new HashSet<>();
         for(String hostname : _hostnames){
-            System.out.println(hostname);
             _nextIndex.put(hostname, lastIndex);
         }
     }
@@ -99,6 +96,9 @@ public class Leader extends Observable implements Runnable {
         return _findNextIndex;
     }
     public HashMap<String , Integer> get_nextIndex(){
+        for(Map.Entry<String, Integer> a : _nextIndex.entrySet()){
+            System.out.println("hostName:" + a.getKey() + " index:" + a.getValue());
+        }
         return _nextIndex;
     }
 }

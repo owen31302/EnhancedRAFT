@@ -309,6 +309,7 @@ public class Host extends Thread implements Observer{
                         //System.out.println("QQ1");
                         String planText = receivedMSG.getPlanText(hostManager.getPublicKey(aSocket.getInetAddress().getHostAddress()));
                         System.out.println("Plan text: " + planText);
+                        System.out.println("RPC: " + RPC);
                         switch (RPC) {
                             case RPCs.REQUESTVOTE:
                                 String[] aurgments = planText.split(",");

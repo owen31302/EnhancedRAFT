@@ -105,6 +105,7 @@ public class StateManager {
         return stateLog.size()-1;
     }
     public LogEntry getLog(int index){
+
         return stateLog.get(index);
     }
 }
