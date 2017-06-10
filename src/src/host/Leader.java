@@ -25,17 +25,13 @@ public class Leader extends Observable implements Runnable {
         _queue = new LinkedList<>();
         _host = host;
         _tcp_replyMsg_all = tcp_replyMsg_all;
-        int lastIndex = _host.getCommitIndex();
-        _hostnames = _host.getHostManager().getHostNames();
         _nextIndex = new HashMap<>();
         _isFindNextIndex = new HashSet<>();
-        for(String hostname : _hostnames){
-            _nextIndex.put(hostname, lastIndex + 1);
-        }
     }
 
     @Override
     public void run() {
+
         System.out.println("I am Leader!");
         // (1)  get the latest log index for each host
         //      update the log for non-up-to-date hosts
@@ -47,6 +43,11 @@ public class Leader extends Observable implements Runnable {
 
         SignedMessage signedMessage;
         TCP_Communicator tcp_communicator = new TCP_Communicator();
+        _hostnames = _host.getHostManager().getHostNames();
+        int lastIndex = _host.getCommitIndex();
+        for(String hostname : _hostnames){
+            _nextIndex.put(hostname, lastIndex + 1);
+        }
 
         _closed = false;
         while (!_closed){
