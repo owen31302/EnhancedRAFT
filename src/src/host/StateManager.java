@@ -18,9 +18,11 @@ public class StateManager {
         stateLog = new ArrayList<LogEntry>(16);
         states = new HashMap<>();
 
+        int i = 0;
         for (String name: stateName) {
+            i++;
             State initializedState = new State(name, 0);
-            LogEntry initialLog = new LogEntry(initializedState, 0, 0);
+            LogEntry initialLog = new LogEntry(initializedState, 0, i);
             states.put(name, initializedState);
             stateLog.add(initialLog);
         }

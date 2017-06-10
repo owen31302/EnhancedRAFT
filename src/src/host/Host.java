@@ -319,7 +319,7 @@ public class Host extends Thread implements Observer{
                                     if (votedTerm < candidateTerm && currentTerm <= candidateTerm
                                             && stateManager.getLastIndex() <= lastLogIndex && stateManager.getLastLog().getTerm() <= lastLogTerm) {
                                         votedTerm++;
-                                        SignedMessage signedMessage = new SignedMessage(RPCs.REQUESTVOTE, "grant", requestHost.getPublicKey());
+                                        SignedMessage signedMessage = new SignedMessage(RPCs.REQUESTVOTE, "grant", privateKey);
                                         tempTCP.replyToOne(onewayCommunicationPackage, signedMessage);
                                         System.out.println("grant vote");
                                     }
