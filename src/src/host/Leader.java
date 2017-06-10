@@ -26,7 +26,9 @@ public class Leader extends Observable implements Runnable {
         _tcp_replyMsg_all = tcp_replyMsg_all;
         int lastIndex = _host.getCommitIndex();
         _hostnames = _host.getHostManager().getHostNames();
+        _nextIndex = new HashMap<>();
         for(String hostname : _hostnames){
+            System.out.println(hostname);
             _nextIndex.put(hostname, lastIndex);
         }
     }
