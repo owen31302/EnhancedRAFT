@@ -19,6 +19,12 @@ public class SignedMessage implements Serializable {
     private byte[] encryptedMessageContent;
 
 
+    /**
+     *
+     * @param messageType
+     * @param message
+     * @param key it should be a private key to encrypt
+     */
     public SignedMessage(String messageType, String message, Key key) {
         this.messageType = messageType;
         this.encryptedMessageContent = encrypt(key, message);
