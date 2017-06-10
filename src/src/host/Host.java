@@ -31,7 +31,6 @@ public class Host extends Thread implements Observer{
     private Candidate candidate;
     private HostAddress votedFor;
     private int commitIndex;
-    private int lastApplied;
     //need to store public keys of other hosts
     private ServerSocket aServer;
     private RSAPrivateKey privateKey;
@@ -137,9 +136,6 @@ public class Host extends Thread implements Observer{
     }
     public int getCommitIndex(){
         return commitIndex;
-    }
-    public int getLastApplied(){
-        return lastApplied;
     }
     public void setCommitIndex(int index){
         commitIndex = index;
