@@ -17,9 +17,11 @@ public class Leader extends Observable implements Runnable {
     private TCP_ReplyMsg_All _tcp_replyMsg_all;
     private Set<String> _hostnames;
     private int _votes;
-    private Queue<LogEntry> _queue;
+    private Queue<State> _queue;
+    public Lock _Lock;
 
     public Leader(Host host, TCP_ReplyMsg_All tcp_replyMsg_all){
+        _Lock = new Lock();
         _queue = new LinkedList<>();
         _host = host;
         _tcp_replyMsg_all = tcp_replyMsg_all;
@@ -28,7 +30,7 @@ public class Leader extends Observable implements Runnable {
         _nextIndex = new HashMap<>();
         _isFindNextIndex = new HashSet<>();
         for(String hostname : _hostnames){
-            _nextIndex.put(hostname, lastIndex);
+            _nextIndex.put(hostname, lastIndex + 1);
         }
     }
 
@@ -57,7 +59,7 @@ public class Leader extends Observable implements Runnable {
                     }else if(_nextIndex.get(hostname) <= _host.getCommitIndex()){
                         // 找到相同位置後，如果不為最新，則要慢慢追上
                         threads.put(hostname, new Thread(new Leader_Worker(this, LeaderJobs.KEEPUPLOG, hostname, _host)));
-                    }else if(_host.getLastApplied()>_host.getCommitIndex()){
+                    }else if(_queue.size()>0){
                         // 前面兩個都通過了，才會執行user request
                         // 如果投票一直沒過，follower就不斷覆蓋同個位置上的log
                         threads.put(hostname, new Thread(new Leader_Worker(this, LeaderJobs.APPENDLOG, hostname, _host)));
@@ -82,8 +84,13 @@ public class Leader extends Observable implements Runnable {
             // 計算append log return true是否超過半數
             // 是，則更新自己的commit，下個while loop會更新follower的log
             // 否，再繼續while loop
-            if(_votes > _hostnames.size() / 2){
+            boolean result = _votes > _hostnames.size() / 2;
+            if(result){
                 _host.setCommitIndex(_host.getCommitIndex()+1);
+            }
+            synchronized (_Lock){
+                _Lock._result = result;
+                _Lock.notifyAll();
             }
         }
     }
@@ -104,15 +111,27 @@ public class Leader extends Observable implements Runnable {
         return _nextIndex;
     }
 
-    public void addEntry(LogEntry logEntry){
-        _queue.offer(logEntry);
+    public boolean addState(State state){
+        _queue.offer(state);
+        synchronized (_Lock){
+            try {
+                _Lock.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return _Lock._result;
     }
 
-    public LogEntry getEntry(){
+    public State getState(){
         return _queue.poll();
     }
 
-    public int sizeQueue(){
-        return _queue.size();
+    class Lock{
+        public boolean _result;
+
+        public Lock(){
+            _result = false;
+        }
     }
 }

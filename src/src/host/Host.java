@@ -31,7 +31,6 @@ public class Host extends Thread implements Observer{
     private Candidate candidate;
     private HostAddress votedFor;
     private int commitIndex;
-    private int lastApplied;
     //need to store public keys of other hosts
     private ServerSocket aServer;
     private RSAPrivateKey privateKey;
@@ -137,9 +136,6 @@ public class Host extends Thread implements Observer{
     }
     public int getCommitIndex(){
         return commitIndex;
-    }
-    public int getLastApplied(){
-        return lastApplied;
     }
     public void setCommitIndex(int index){
         commitIndex = index;
@@ -292,7 +288,17 @@ public class Host extends Thread implements Observer{
                         followerThread = new Thread( follower );
                         followerThread.setDaemon(true);
                         followerThread.start();
-                        System.out.println("123");
+                        break;
+
+                    case Protocol.CHANGEVALUE:
+                        String stateName = (String)oIn.readObject();
+                        int newValue = oIn.readInt();
+                        if (leader.addState(new host.State(stateName, newValue))) {
+                            oOut.writeObject("State changed.");
+                        }
+                        else {
+                            oOut.writeObject("State change fail.");
+                        }
                         break;
 
                     case Protocol.REQUESTLEADERADDRESS:
@@ -333,15 +339,42 @@ public class Host extends Thread implements Observer{
                                     }
                                 }
                                 break;
+
                             case RPCs.APPENDENTRY:
-                                if (stateManager.getLog(Integer.parseInt(aurgments[1])).getString().equals(planText)) {
-                                    System.out.println("log entry pass1");
-                                    tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.SUCCESS, privateKey));
-                                    System.out.println("log entry pass2");
+                                int leaderTerm = Integer.parseInt(aurgments[0]);
+                                String leaderName = aurgments[1];
+                                int preLogIndex = Integer.parseInt(aurgments[2]);
+                                int preLogTerm = Integer.parseInt(aurgments[3]);
+                                String newState = aurgments[4];
+                                int leaderCommit = Integer.parseInt(aurgments[5]);
+
+                                if (currentTerm <= leaderTerm) {
+                                    charactor = CharacterManagement.FOLLOWER;
+                                    hostManager.setLeaderAddress(leaderName);
+
+                                    if (stateManager.getLastIndex() <= leaderTerm && stateManager.getLog(preLogIndex).getTerm() == preLogTerm) {
+                                        if (!newState.equals("")) {
+                                            String[] stateParameter = newState.split("->");
+                                            stateManager.appendAnEntry(new host.State(stateParameter[0], Integer.parseInt(stateParameter[1])), currentTerm);
+                                            tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.SUCCESS, privateKey));
+                                        }
+                                        for (int ii = commitIndex + 1; ii < leaderCommit; ii++) {
+                                            stateManager.commitEntry(ii);
+                                            System.out.println();
+                                        }
+                                    }
+                                    else {
+                                        tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.FAIL, privateKey));
+                                    }
                                 }
-                                else {
-                                    tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.FAIL, privateKey));
-                                }
+//                                if (stateManager.getLog(Integer.parseInt(aurgments[1])).getString().equals(planText)) {
+//                                    System.out.println("log entry pass1");
+//                                    tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.SUCCESS, privateKey));
+//                                    System.out.println("log entry pass2");
+//                                }
+//                                else {
+//                                    tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.FAIL, privateKey));
+//                                }
                                 break;
                         }
                         break;

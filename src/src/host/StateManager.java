@@ -1,9 +1,6 @@
 package host;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 
 /**
  * Created by TC_Yeh on 5/26/2017.
@@ -51,6 +48,7 @@ public class StateManager {
         if (commitFailEnable) {
             return false;
         }else if (fileStoreHandler.storeNewValue(logToCommit)){
+            states.get(stateLog.get(at).getState().getStateName()).changeState(stateLog.get(at).getState().getStateValue());
             stateLog.get(at).commitEntry();
             return true;
         }else {
@@ -107,5 +105,13 @@ public class StateManager {
     public LogEntry getLog(int index){
 
         return stateLog.get(index);
+    }
+
+    public String toString(){
+        StringBuffer result = new StringBuffer();
+        for (Map.Entry<String, State> a: states.entrySet()) {
+            result.append(a.toString() + ";");
+        }
+        return result.toString().substring(0, result.length());
     }
 }
