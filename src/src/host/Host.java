@@ -187,7 +187,7 @@ public class Host extends Thread implements Observer{
 
                 System.out.println("command:" + command);
                 switch (command) {
-                    case Protocol.AddHostAddresses:
+                    case Protocol.ADDHOSTADDRESS:
                         ArrayList<HostAddress> hostAddressArrayList = (ArrayList<HostAddress>)(oIn.readObject());
                         //asking other host for their public key
                         RequestResponse[] otherHosts = new RequestResponse[hostAddressArrayList.size() - 1];
@@ -248,7 +248,7 @@ public class Host extends Thread implements Observer{
                             }
                         }
                         System.out.println("wait join");
-                        oOut.writeInt(Protocol.Ackowledgement);
+                        oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
                         System.out.println(hostManager);
                         followerThread = new Thread( follower );
@@ -262,7 +262,7 @@ public class Host extends Thread implements Observer{
                         HostAddress temp = (HostAddress)(parameter);
                         temp.setHostName((String)oIn.readObject());
                         temp.setPublicKey((RSAPublicKey)oIn.readObject());
-                        oOut.writeInt(Protocol.Ackowledgement);
+                        oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
                         hostManager.addHostToList(temp);
                         break;
@@ -270,7 +270,7 @@ public class Host extends Thread implements Observer{
                     case Protocol.REPLYHOSTNAME:
                         oOut.writeObject(hostName);
                         oOut.writeObject(publicKey);
-                        if (oIn.readInt() != Protocol.Ackowledgement){
+                        if (oIn.readInt() != Protocol.ACKOWLEDGEMENT){
                             System.out.println("Error happened when sending host name");
                         }
                         break;
@@ -279,14 +279,14 @@ public class Host extends Thread implements Observer{
                         oOut.writeInt(Protocol.REPLYHOSTLIST);
                         oOut.flush();
                         oOut.writeObject(hostManager.getHostList());
-                        if(oIn.readInt() != Protocol.Ackowledgement){
+                        if(oIn.readInt() != Protocol.ACKOWLEDGEMENT){
                             System.out.println("Error happened when updating host list");
                         }
                         break;
 
                     case Protocol.REPLYHOSTLIST:
                         hostManager.replaceHostList((HashMap<String ,HostAddress>)oIn.readObject());
-                        oOut.writeInt(Protocol.Ackowledgement);
+                        oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
                         System.out.println(hostManager);
                         followerThread = new Thread( follower );
