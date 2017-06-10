@@ -5,6 +5,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class is used for manager all host in the cluster
@@ -109,8 +110,8 @@ public class HostManager {
         return hostList;
     }
 
-    public String[] getHostNames(){
-        return (String[]) hostList.keySet().toArray();
+    public Set<String> getHostNames(){
+        return hostList.keySet();
     }
 
     /**

@@ -75,7 +75,6 @@ public class LogEntry {
 
     public String getString(){
         String[] array = new String[] {
-                state.toString(),
                 String.valueOf(term),
                 String.valueOf(index),
                 String.valueOf(isCommitted)
