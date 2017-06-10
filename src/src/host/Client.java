@@ -57,7 +57,6 @@ public class Client {
                     System.out.print(", port number ");
                     System.out.print(s.getHostPort());
                     System.out.println(".");
-//                    e.printStackTrace();
                 }
             }else if (Objects.equals(cmdCode, "byzantineenable")) {
                 HostAddress leader = findLeader();
@@ -69,7 +68,8 @@ public class Client {
                     Socket socket = new Socket(leader.getHostIp(), leader.getHostPort());
                     ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
-                    outStream.writeChars("byzantineEnable");
+                    outStream.flush();
+                    outStream.writeInt(Protocol.EnableByzantine);
                     outStream.flush();
                     int waitingForACK = inStream.readInt();
                     if(waitingForACK != Protocol.ACKOWLEDGEMENT){
@@ -91,7 +91,8 @@ public class Client {
                     Socket socket = new Socket(leader.getHostIp(), leader.getHostPort());
                     ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
-                    outStream.writeChars("byzantineDisable");
+                    outStream.flush();
+                    outStream.writeInt(Protocol.DisableByzantine);
                     outStream.flush();
                     int waitingForACK = inStream.readInt();
                     if(waitingForACK != Protocol.ACKOWLEDGEMENT){
@@ -112,14 +113,18 @@ public class Client {
                 userInput.trim();
                 String[] inputParts = userInput.split(" ");
                 int newValue;
+                if (inputParts.length != 3) {
+                    System.out.println("Please input: changeValue <state name> <new value>");
+                    continue;
+                }
                 try {
                     newValue = Integer.valueOf(inputParts[2]);
                 }catch (NumberFormatException e) {
                     System.out.println("please enter a integer number");
                     continue;
                 }
-                if ((inputParts[2] == null) || Objects.equals(inputParts[2], " ")) {
-                    inputParts[2] = "default";
+                if ((inputParts[1] == null) || Objects.equals(inputParts[1], " ")) {
+                    inputParts[1] = "default";
                 }
                 HostAddress leader = findLeader();
                 if (leader == null) {
@@ -130,9 +135,10 @@ public class Client {
                     Socket socket = new Socket(leader.getHostIp(), leader.getHostPort());
                     ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
+                    outStream.flush();
                     outStream.writeInt(Protocol.CHANGEVALUE);
                     outStream.flush();
-                    outStream.writeChars(inputParts[1]);
+                    outStream.writeObject(inputParts[1]);
                     outStream.flush();
                     outStream.writeInt(newValue);
                     outStream.flush();
@@ -141,6 +147,13 @@ public class Client {
                         System.out.print("ACK NOT RECEIVED\n");
                         // maybe need to try again
                     }
+                    try {
+                        String receivedMessage = (String)inStream.readObject();
+                    }catch (ClassNotFoundException x) {
+                        System.out.println("received is not String object");
+                        continue;
+                    }
+
                     socket.close();
                 }catch (IOException e){
                     e.printStackTrace();
