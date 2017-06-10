@@ -13,6 +13,9 @@ public class Keys {
     private RSAPrivateKey privateKey;
     private RSAPublicKey publicKey;
 
+    /**
+     * Constructor
+     */
     public Keys() {
         KeyPairGenerator keyPairGen = null;
         try {
@@ -31,10 +34,18 @@ public class Keys {
         this.publicKey = (RSAPublicKey) keyPair.getPublic();
     }
 
+    /**
+     * Get public key
+     * @return public key
+     */
     public RSAPublicKey getPublicKey() {
         return this.publicKey;
     }
 
+    /**
+     * Get private key
+     * @return private key
+     */
     public RSAPrivateKey getPrivateKey() {
         return this.privateKey;
     }

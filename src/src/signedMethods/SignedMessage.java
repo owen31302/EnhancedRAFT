@@ -20,7 +20,7 @@ public class SignedMessage implements Serializable {
 
 
     /**
-     *
+     * Constructor
      * @param messageType
      * @param message
      * @param key it should be a private key to encrypt
@@ -30,6 +30,12 @@ public class SignedMessage implements Serializable {
         this.encryptedMessageContent = encrypt(key, message);
     }
 
+    /**
+     * Encrypt a message with String type using private key
+     * @param k
+     * @param data
+     * @return
+     */
     public static byte[] encrypt(Key k, String data) {
         byte[] data_bytes = new byte[0];
         try {
@@ -46,7 +52,6 @@ public class SignedMessage implements Serializable {
                 cipher.init(Cipher.ENCRYPT_MODE, k);
                 byte[] resultBytes = cipher.doFinal(data_bytes);
                 return resultBytes;
-//                return new String(resultBytes);
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             } catch (NoSuchPaddingException e) {
@@ -58,22 +63,18 @@ public class SignedMessage implements Serializable {
             } catch (InvalidKeyException e) {
                 e.printStackTrace();
             }
-//            catch (UnsupportedEncodingException e) {
-//                e.printStackTrace();
-//            }
         }
         return null;
     }
 
     /**
-     *
+     * Decrypt message using public key
      * @param k
      * @param data_bytes
      * @return
      */
     public static String decrypt(Key k, byte[] data_bytes) {
         if (k != null) {
-
             Cipher cipher = null;
             try {
                 cipher = Cipher.getInstance("RSA");
@@ -96,14 +97,28 @@ public class SignedMessage implements Serializable {
         }
         return null;
     }
+
+    /**
+     * Get message type
+     * @return
+     */
     public String getMessageType() {
         return messageType;
     }
 
-    public byte[] getEncryptedMessageContent() {
+    /**
+     * Get encrypted message content
+     * @return
+     */
+    private byte[] getEncryptedMessageContent() {
         return encryptedMessageContent;
     }
 
+    /**
+     * Get plan text
+     * @param k
+     * @return
+     */
     public String getPlanText(Key k) {
         return decrypt(k, encryptedMessageContent);
     }
