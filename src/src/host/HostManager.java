@@ -138,6 +138,9 @@ public class HostManager {
         leaderAddress = leader;
     }
 
+    public void setLeaderAddress(String leaderName){
+        leaderAddress = hostList.get(leaderName);
+    }
     /**
      * This method returns leader's information.
      * @return leader's address
