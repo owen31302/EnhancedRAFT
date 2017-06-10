@@ -187,7 +187,7 @@ public class Host extends Thread implements Observer{
 
                 System.out.println("command:" + command);
                 switch (command) {
-                    case Protocol.AddHostAddresses:
+                    case Protocol.ADDHOSTADDRESS:
                         ArrayList<HostAddress> hostAddressArrayList = (ArrayList<HostAddress>)(oIn.readObject());
                         //asking other host for their public key
                         RequestResponse[] otherHosts = new RequestResponse[hostAddressArrayList.size() - 1];
@@ -248,7 +248,7 @@ public class Host extends Thread implements Observer{
                             }
                         }
                         System.out.println("wait join");
-                        oOut.writeInt(Protocol.Ackowledgement);
+                        oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
                         System.out.println(hostManager);
                         followerThread = new Thread( follower );
@@ -262,7 +262,7 @@ public class Host extends Thread implements Observer{
                         HostAddress temp = (HostAddress)(parameter);
                         temp.setHostName((String)oIn.readObject());
                         temp.setPublicKey((RSAPublicKey)oIn.readObject());
-                        oOut.writeInt(Protocol.Ackowledgement);
+                        oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
                         hostManager.addHostToList(temp);
                         break;
@@ -270,7 +270,7 @@ public class Host extends Thread implements Observer{
                     case Protocol.REPLYHOSTNAME:
                         oOut.writeObject(hostName);
                         oOut.writeObject(publicKey);
-                        if (oIn.readInt() != Protocol.Ackowledgement){
+                        if (oIn.readInt() != Protocol.ACKOWLEDGEMENT){
                             System.out.println("Error happened when sending host name");
                         }
                         break;
@@ -279,20 +279,24 @@ public class Host extends Thread implements Observer{
                         oOut.writeInt(Protocol.REPLYHOSTLIST);
                         oOut.flush();
                         oOut.writeObject(hostManager.getHostList());
-                        if(oIn.readInt() != Protocol.Ackowledgement){
+                        if(oIn.readInt() != Protocol.ACKOWLEDGEMENT){
                             System.out.println("Error happened when updating host list");
                         }
                         break;
 
                     case Protocol.REPLYHOSTLIST:
                         hostManager.replaceHostList((HashMap<String ,HostAddress>)oIn.readObject());
-                        oOut.writeInt(Protocol.Ackowledgement);
+                        oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
                         System.out.println(hostManager);
                         followerThread = new Thread( follower );
                         followerThread.setDaemon(true);
                         followerThread.start();
                         System.out.println("123");
+                        break;
+
+                    case Protocol.REQUESTLEADERADDRESS:
+                        oOut.writeObject(hostManager.getLeaderAddress().getHostIp());
                         break;
 
                     case Protocol.RPCREQUEST:
@@ -310,24 +314,34 @@ public class Host extends Thread implements Observer{
                         String planText = receivedMSG.getPlanText(hostManager.getPublicKey(aSocket.getInetAddress().getHostAddress()));
                         System.out.println("Plan text: " + planText);
                         System.out.println("RPC: " + RPC);
+                        String[] aurgments = planText.split(",");
                         switch (RPC) {
                             case RPCs.REQUESTVOTE:
-                                String[] aurgments = planText.split(",");
+                                follower.receivedHeartBeat();
                                 int candidateTerm = Integer.parseInt(aurgments[0]);
                                 int lastLogIndex = Integer.parseInt(aurgments[2]);
                                 int lastLogTerm = Integer.parseInt(aurgments[3]);
                                 synchronized (votedTerm) {
                                     if (votedTerm < candidateTerm && currentTerm <= candidateTerm
                                             && stateManager.getLastIndex() <= lastLogIndex && stateManager.getLastLog().getTerm() <= lastLogTerm) {
-                                        votedTerm++;
-                                        SignedMessage signedMessage = new SignedMessage(RPCs.REQUESTVOTE, "Yes", privateKey);
+                                        votedTerm = candidateTerm;
+                                        currentTerm = candidateTerm;
+                                        //SignedMessage signedMessage = new SignedMessage(RPCs.REQUESTVOTE, "Yes", privateKey);
                                         System.out.println("aaa");
-                                        tempTCP.replyToOne(onewayCommunicationPackage, signedMessage);
+                                        tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.REQUESTVOTE, "Yes", privateKey));
                                         System.out.println("grant vote");
                                     }
                                 }
                                 break;
                             case RPCs.APPENDENTRY:
+                                if (stateManager.getLog(Integer.parseInt(aurgments[1])).getString().equals(planText)) {
+                                    System.out.println("log entry pass1");
+                                    tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.SUCCESS, privateKey));
+                                    System.out.println("log entry pass2");
+                                }
+                                else {
+                                    tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.FAIL, privateKey));
+                                }
                                 break;
                         }
                         break;
