@@ -183,17 +183,18 @@ public class TCP_Worker extends Thread {
             }
 
             // wait for jobType to be changed to replyToOne, then send reply, one trip
-            synchronized (this.jobType) {
+            synchronized (this.tcp_ReplyMsg_One) {
                 while (this.msg == null) {
                     if (DEBUG) System.out.println("From TCP_worker: no message to be sent yet, waiting...");
                     try {
-                        this.jobType.wait();
+                        this.tcp_ReplyMsg_One.wait();
                         if (DEBUG) System.out.println("From TCP_worker: got notify job type is changed ! ");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
             }
+
             // reply to one specified client socket, one trip
             if (this.jobType.equals(JobType.replyToOne)) {
                 if (DEBUG) System.out.println("From TCP_worker: job type is changed to " + this.jobType);

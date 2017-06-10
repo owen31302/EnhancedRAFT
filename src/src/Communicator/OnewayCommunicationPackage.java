@@ -72,8 +72,8 @@ public class OnewayCommunicationPackage {
         this.tcp_worker.setJobType(JobType.replyToOne);
         this.jobType = this.tcp_worker.getJobType();
 
-        synchronized (this.jobType) {
-            this.jobType.notifyAll();
+        synchronized (this.reply_success) {
+            this.reply_success.notifyAll();
         }
         if (DEBUG) System.out.println("From onewayCommu: notify that job type is changed!");
 
