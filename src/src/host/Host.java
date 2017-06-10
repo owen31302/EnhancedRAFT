@@ -310,9 +310,9 @@ public class Host extends Thread implements Observer{
                         String planText = receivedMSG.getPlanText(hostManager.getPublicKey(aSocket.getInetAddress().getHostAddress()));
                         System.out.println("Plan text: " + planText);
                         System.out.println("RPC: " + RPC);
+                        String[] aurgments = planText.split(",");
                         switch (RPC) {
                             case RPCs.REQUESTVOTE:
-                                String[] aurgments = planText.split(",");
                                 int candidateTerm = Integer.parseInt(aurgments[0]);
                                 int lastLogIndex = Integer.parseInt(aurgments[2]);
                                 int lastLogTerm = Integer.parseInt(aurgments[3]);
@@ -320,14 +320,19 @@ public class Host extends Thread implements Observer{
                                     if (votedTerm < candidateTerm && currentTerm <= candidateTerm
                                             && stateManager.getLastIndex() <= lastLogIndex && stateManager.getLastLog().getTerm() <= lastLogTerm) {
                                         votedTerm++;
-                                        SignedMessage signedMessage = new SignedMessage(RPCs.REQUESTVOTE, "Yes", privateKey);
+                                        //SignedMessage signedMessage = new SignedMessage(RPCs.REQUESTVOTE, "Yes", privateKey);
                                         System.out.println("aaa");
-                                        tempTCP.replyToOne(onewayCommunicationPackage, signedMessage);
+                                        tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.REQUESTVOTE, "Yes", privateKey));
                                         System.out.println("grant vote");
                                     }
                                 }
                                 break;
                             case RPCs.APPENDENTRY:
+                                if (stateManager.getLog(Integer.parseInt(aurgments[1])).getString().equals(planText)) {
+                                    System.out.println("log entry pass1");
+                                    tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, "Yes", privateKey));
+                                    System.out.println("log entry pass2");
+                                }
                                 break;
                         }
                         break;
