@@ -295,6 +295,10 @@ public class Host extends Thread implements Observer{
                         System.out.println("123");
                         break;
 
+                    case Protocol.REQUESTLEADERADDRESS:
+                        oOut.writeObject(hostManager.getLeaderAddress().getHostIp());
+                        break;
+
                     case Protocol.RPCREQUEST:
                         //System.out.println("QQ6");
                         TCP_Communicator tempTCP = new TCP_Communicator();
@@ -313,13 +317,15 @@ public class Host extends Thread implements Observer{
                         String[] aurgments = planText.split(",");
                         switch (RPC) {
                             case RPCs.REQUESTVOTE:
+                                follower.receivedHeartBeat();
                                 int candidateTerm = Integer.parseInt(aurgments[0]);
                                 int lastLogIndex = Integer.parseInt(aurgments[2]);
                                 int lastLogTerm = Integer.parseInt(aurgments[3]);
                                 synchronized (votedTerm) {
                                     if (votedTerm < candidateTerm && currentTerm <= candidateTerm
                                             && stateManager.getLastIndex() <= lastLogIndex && stateManager.getLastLog().getTerm() <= lastLogTerm) {
-                                        votedTerm++;
+                                        votedTerm = candidateTerm;
+                                        currentTerm = candidateTerm;
                                         //SignedMessage signedMessage = new SignedMessage(RPCs.REQUESTVOTE, "Yes", privateKey);
                                         System.out.println("aaa");
                                         tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.REQUESTVOTE, "Yes", privateKey));
@@ -330,8 +336,11 @@ public class Host extends Thread implements Observer{
                             case RPCs.APPENDENTRY:
                                 if (stateManager.getLog(Integer.parseInt(aurgments[1])).getString().equals(planText)) {
                                     System.out.println("log entry pass1");
-                                    tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, "Yes", privateKey));
+                                    tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.SUCCESS, privateKey));
                                     System.out.println("log entry pass2");
+                                }
+                                else {
+                                    tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.FAIL, privateKey));
                                 }
                                 break;
                         }
