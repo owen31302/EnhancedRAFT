@@ -7,6 +7,7 @@ import signedMethods.SignedMessage;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Observable;
+import java.util.Set;
 
 /**
  * Created by TC_Yeh on 5/26/2017.
@@ -17,7 +18,7 @@ public class Leader extends Observable implements Runnable {
     private HashSet<String> _findNextIndex;
     private Host _host;
     private TCP_ReplyMsg_All _tcp_replyMsg_all;
-    private String[] _hostnames;
+    private Set<String> _hostnames;
     private int _votes;
 
     public Leader(Host host, TCP_ReplyMsg_All tcp_replyMsg_all){
@@ -80,7 +81,7 @@ public class Leader extends Observable implements Runnable {
             // 計算append log return true是否超過半數
             // 是，則更新自己的commit，下個while loop會更新follower的log
             // 否，再繼續while loop
-            if(_votes > _hostnames.length / 2){
+            if(_votes > _hostnames.size() / 2){
                 _host.setCommitIndex(_host.getCommitIndex()+1);
             }
         }
