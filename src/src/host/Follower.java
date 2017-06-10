@@ -13,7 +13,7 @@ public class Follower extends Observable implements Runnable {
     private double _time;
     private final int BASELATENCY = 300;
     private final int DURATION = 200;
-    private boolean _closed = false;
+    private boolean _closed;
 
     public Follower(StateManager stateManager){
         resetTimer();
@@ -23,6 +23,7 @@ public class Follower extends Observable implements Runnable {
     @Override
     public void run() {
         System.out.println("I am Follower!");
+        _closed = false;
         long startTime = System.currentTimeMillis();
         while(_time>0){
             long endTime   = System.currentTimeMillis();

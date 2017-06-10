@@ -10,7 +10,7 @@ import java.util.*;
  * Created by TC_Yeh on 5/26/2017.
  */
 public class Leader extends Observable implements Runnable {
-    private boolean _closed = false;
+    private boolean _closed;
     private HashMap<String , Integer> _nextIndex;
     private HashSet<String> _isFindNextIndex;
     private Host _host;
@@ -47,6 +47,8 @@ public class Leader extends Observable implements Runnable {
 
         SignedMessage signedMessage;
         TCP_Communicator tcp_communicator = new TCP_Communicator();
+
+        _closed = false;
         while (!_closed){
             _votes = 0;
             HashMap<String, Thread> threads = new HashMap<>();
@@ -133,5 +135,9 @@ public class Leader extends Observable implements Runnable {
         public Lock(){
             _result = false;
         }
+    }
+
+    public void leave(){
+        _closed = true;
     }
 }

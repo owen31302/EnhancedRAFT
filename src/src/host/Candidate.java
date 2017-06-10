@@ -9,7 +9,7 @@ import java.util.Observable;
  * Created by owen on 5/26/17.
  */
 public class Candidate extends Observable implements Runnable {
-    private boolean _closed = false;
+    private boolean _closed;
     private Host _host;
     private TCP_ReplyMsg_All _tcp_ReplyMsg_All;
 
@@ -24,6 +24,7 @@ public class Candidate extends Observable implements Runnable {
         SignedMessage signedMessage;
         TCP_Communicator tcp_communicator = new TCP_Communicator();
 
+        _closed = false;
         while (!result && !_closed){
             _tcp_ReplyMsg_All = new TCP_ReplyMsg_All();
             // requestVoteArray[0] = term
