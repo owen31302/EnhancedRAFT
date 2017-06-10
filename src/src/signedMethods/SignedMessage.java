@@ -110,7 +110,7 @@ public class SignedMessage implements Serializable {
      * Get encrypted message content
      * @return
      */
-    private byte[] getEncryptedMessageContent() {
+    public byte[] getEncryptedMessageContent() {
         return encryptedMessageContent;
     }
 
