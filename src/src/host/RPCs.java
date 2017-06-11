@@ -10,4 +10,5 @@ public class RPCs {
     static final String HEARTBEAT = "HEARTBEAT";
     static final String SUCCESS = "SUCCESS";
     static final String FAIL = "FAIL";
+    static final String BFAIL = "BFAIL";
 }

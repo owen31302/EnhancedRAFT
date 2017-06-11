@@ -6,6 +6,7 @@ import signedMethods.SignedMessage;
 
 import javax.annotation.processing.SupportedSourceVersion;
 import java.security.interfaces.RSAPublicKey;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by Yu-Cheng Lin on 5/31/17.
@@ -126,18 +127,25 @@ public class Leader_Worker implements Runnable {
                 }
                 // 前面兩個都通過了，才會執行user request
                 // 如果投票一直沒過，follower就不斷覆蓋同個位置上的log
-                State state = null;
                 synchronized (_leader._queue){
                     if(!_leader._queue.isEmpty()){
-                        state = _leader.getState();
-                        _host.getStateManager().appendAnEntry(state, _host.getCurrentTerm());
+                        Leader.BState bState = _leader.getState();
+                        _host.getStateManager().appendAnEntry(bState._state, _host.getCurrentTerm());
+                        if(bState._isByzantine){
+                            int size = 1000;
+                            int randomValue = ThreadLocalRandom.current().nextInt(0, size);
+                            State newState = new State(bState._state.getStateName(), randomValue);
+                            appendEntryArray[4] = newState.toString();
+                        }else{
+                            appendEntryArray[4] = bState._state.toString();
+                        }
                     }else{
-                        state = _host.getStateManager().getLastLog().getState();
+                        State state = _host.getStateManager().getLastLog().getState();
                         appendEntryArray[2] = String.valueOf(_host.getStateManager().getLog(_host.getStateManager().getLastIndex()-1).getIndex());
                         appendEntryArray[3] = String.valueOf(_host.getStateManager().getLog(_host.getStateManager().getLastIndex()-1).getTerm());
+                        appendEntryArray[4] = state.toString();
                     }
                 }
-                appendEntryArray[4] = state.toString();
                 appendEntry = String.join(",", appendEntryArray);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
@@ -156,6 +164,8 @@ public class Leader_Worker implements Runnable {
                             System.out.println("RPCs.FAIL 3");
                         }
                         _leader.get_isFindNextIndex().remove(_hostName);
+                    }else if(msg.equals(RPCs.BFAIL)){
+                        System.out.println("RPCs.BFAIL 3");
                     }else{
                         if (commentFlag){
                             System.out.println("Some error 3");
