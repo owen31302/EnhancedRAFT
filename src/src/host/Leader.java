@@ -17,7 +17,7 @@ public class Leader extends Observable implements Runnable {
     private TCP_ReplyMsg_All _tcp_replyMsg_all;
     private Set<String> _hostnames;
     private int _votes;
-    public Queue<State> _queue;
+    public Queue<BState> _queue;
     public Lock _Lock;
 
     public Leader(Host host, TCP_ReplyMsg_All tcp_replyMsg_all){
@@ -54,6 +54,7 @@ public class Leader extends Observable implements Runnable {
         while (!_closed){
             _votes = 1;
             HashMap<String, Thread> threads = new HashMap<>();
+            int queueSize = _queue.size();
             for(String hostname : _hostnames){
                 if(!hostname.equals(_host.getHostManager().getMyHostName())){
                     if(!_isFindNextIndex.contains(hostname)){
@@ -63,7 +64,7 @@ public class Leader extends Observable implements Runnable {
                     }else if(_nextIndex.get(hostname) <= _host.getCommitIndex()){
                         // 找到相同位置後，如果不為最新，則要慢慢追上
                         threads.put(hostname, new Thread(new Leader_Worker(this, LeaderJobs.KEEPUPLOG, hostname, _host)));
-                    }else if(_queue.size()>0){
+                    }else if(queueSize > 0){
                         // 前面兩個都通過了，才會執行user request
                         // 如果投票一直沒過，follower就不斷覆蓋同個位置上的log
                         threads.put(hostname, new Thread(new Leader_Worker(this, LeaderJobs.APPENDLOG, hostname, _host)));
@@ -91,6 +92,8 @@ public class Leader extends Observable implements Runnable {
             boolean result = _votes > _hostnames.size() / 2;
             if(result){
                 _host.setCommitIndex(_host.getCommitIndex()+1);
+            }else{
+                _host.getStateManager().deleteLastEntry();
             }
             synchronized (_Lock){
                 _Lock._result = result;
@@ -115,8 +118,9 @@ public class Leader extends Observable implements Runnable {
         return _nextIndex;
     }
 
-    public boolean addState(State state){
-        _queue.offer(state);
+    public boolean addState(State state, boolean isByzantine){
+        BState bState = new BState(state, isByzantine);
+        _queue.offer(bState);
         synchronized (_Lock){
             try {
                 _Lock.wait();
@@ -127,7 +131,7 @@ public class Leader extends Observable implements Runnable {
         return _Lock._result;
     }
 
-    public State getState(){
+    public BState getState(){
         return _queue.poll();
     }
 
@@ -141,5 +145,14 @@ public class Leader extends Observable implements Runnable {
 
     public void leave(){
         _closed = true;
+    }
+
+    class BState{
+        public State _state;
+        public boolean _isByzantine;
+        public BState(State state, boolean isByzantine){
+            _state = state;
+            _isByzantine = isByzantine;
+        }
     }
 }
