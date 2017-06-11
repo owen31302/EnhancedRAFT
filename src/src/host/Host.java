@@ -291,7 +291,7 @@ public class Host extends Thread implements Observer{
                         System.out.println(hostManager);
                         followerThread = new Thread( follower );
                         followerThread.setDaemon(true);
-                        //followerThread.start();
+                        followerThread.start();
                         break;
 
                     case Protocol.CHANGEVALUE:
@@ -367,11 +367,14 @@ public class Host extends Thread implements Observer{
                                 if (currentTerm <= leaderTerm) {
                                     if (charactor != CharacterManagement.FOLLOWER) {
                                         charactor = CharacterManagement.FOLLOWER;
+                                        candidate.leave();
                                         followerThread = new Thread( follower );
                                         followerThread.setDaemon(true);
                                         followerThread.start();
                                     }
                                     hostManager.setLeaderAddress(leaderName);
+                                    currentTerm = leaderTerm;
+                                    follower.receivedHeartBeat();
 //                                    System.out.println(stateManager.getLastIndex() <= leaderTerm);
 //                                    System.out.println(stateManager.getLog(preLogIndex).getTerm() == preLogTerm);
 //                                    System.out.println(stateManager.getLastIndex());
@@ -381,10 +384,13 @@ public class Host extends Thread implements Observer{
                                     if (stateManager.getLastIndex() >= preLogIndex && stateManager.getLog(preLogIndex).getTerm() == preLogTerm) {
                                         if (!newState.equals("")) {
                                             String[] stateParameter = newState.split("->");
-                                            follower.appendAnEntry(new host.State(stateParameter[0], Integer.parseInt(stateParameter[1])), currentTerm);
+                                            host.State tempState = new host.State(stateParameter[0], Integer.parseInt(stateParameter[1]));
+                                            System.out.println(tempState);
+                                            follower.appendAnEntry(tempState, currentTerm);
                                         }
-                                        for (int ii = commitIndex; ii < leaderCommit; ii++) {
-                                            stateManager.commitEntry(ii);
+                                        System.out.println("commitIndex: " + commitIndex);
+                                        while (commitIndex < leaderCommit) {
+                                            stateManager.commitEntry(++commitIndex);
                                             System.out.println("123");
                                         }
                                         tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.SUCCESS, privateKey));
