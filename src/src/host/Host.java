@@ -71,7 +71,7 @@ public class Host extends Thread implements Observer{
             try {
                 RequestResponse aRequest = new RequestResponse(aServer.accept(), -1, null);
                 aRequest.start();
-                System.out.println("get requst");
+               // System.out.println("get requst");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -216,18 +216,12 @@ public class Host extends Thread implements Observer{
                                 e.printStackTrace();
                             }
                         }
-//                        for (int j = 0; j < i; j++) {
-//                            otherHosts[j] = new RequestResponse(hostAddressArrayList.get(j), Protocol.UPDATEHOSTLIST, null);
-//                            otherHosts[j].start();
-//
-//                        }
 
                         i = 0;
                         for (HostAddress a: hostAddressArrayList){ //ask other hosts' public key
                             if (!a.equals(myAddress)) {
                                 try {
                                     otherHosts[i] = new RequestResponse(a, Protocol.UPDATEHOSTLIST, null);
-                                    System.out.println("send to a");
                                     otherHosts[i].start();
                                     i++;
                                 } catch (IOException e){
@@ -247,11 +241,9 @@ public class Host extends Thread implements Observer{
                                 e.printStackTrace();
                             }
                         }
-                        System.out.println("wait join");
                         oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
                         System.out.println(hostManager);
-                        System.out.println("New Follower 1");
                         followerThread = new Thread( follower );
                         followerThread.setDaemon(true);
                         followerThread.start();
@@ -341,7 +333,6 @@ public class Host extends Thread implements Observer{
                                         }
                                         candidate.leave();
                                         charactor = CharacterManagement.FOLLOWER;
-                                        System.out.println("New Follower 3");
                                         followerThread = new Thread( follower );
                                         followerThread.setDaemon(true);
                                         followerThread.start();
@@ -370,7 +361,6 @@ public class Host extends Thread implements Observer{
                                     if (charactor != CharacterManagement.FOLLOWER) {
                                         charactor = CharacterManagement.FOLLOWER;
                                         candidate.leave();
-                                        System.out.println("New Follower 4");
                                         followerThread = new Thread( follower );
                                         followerThread.setDaemon(true);
                                         followerThread.start();
@@ -394,23 +384,17 @@ public class Host extends Thread implements Observer{
                                         System.out.println("commitIndex: " + commitIndex);
                                         while (commitIndex < leaderCommit) {
                                             stateManager.commitEntry(++commitIndex);
-                                            System.out.println("123");
                                         }
                                         tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.SUCCESS, privateKey));
                                         System.out.println(stateManager.toString());
+                                        follower.receivedHeartBeat();
                                     }
                                     else {
                                         tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.FAIL, privateKey));
+                                        follower.receivedHeartBeat();
                                     }
                                 }
-//                                if (stateManager.getLog(Integer.parseInt(aurgments[1])).getString().equals(planText)) {
-//                                    System.out.println("log entry pass1");
-//                                    tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.SUCCESS, privateKey));
-//                                    System.out.println("log entry pass2");
-//                                }
-//                                else {
-//                                    tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.FAIL, privateKey));
-//                                }
+
                                 break;
                         }
                         break;
