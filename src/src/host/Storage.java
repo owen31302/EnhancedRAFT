@@ -22,14 +22,22 @@ public class Storage {
      */
     public boolean storeNewValue(LogEntry newValue) {
         try {
+            logFileWrite.flush();
             logFileWrite.write(String.valueOf(newValue.getIndex()));
+            logFileWrite.flush();
             logFileWrite.write("\t\t");
+            logFileWrite.flush();
             logFileWrite.write(String.valueOf(newValue.getTerm()));
+            logFileWrite.flush();
             logFileWrite.write("\t\t");
+            logFileWrite.flush();
             logFileWrite.write(String.valueOf(newValue.getState().getStateName()));
+            logFileWrite.flush();
             logFileWrite.write("\t\t");
+            logFileWrite.flush();
             logFileWrite.write(String.valueOf(newValue.getState().getStateValue()));
-            logFileWrite.write("\n");
+            logFileWrite.flush();
+            logFileWrite.write(System.lineSeparator());
             logFileWrite.flush();
         }catch (IOException exception) {
             // why this could happen?
@@ -102,10 +110,15 @@ public class Storage {
      */
     public boolean storeVote(int currentTerm, int voteTo) {
         try {
+            voteFileWrite.flush();
             voteFileWrite.write(currentTerm);
+            voteFileWrite.flush();
             voteFileWrite.write("\t");
+            voteFileWrite.flush();
             voteFileWrite.write(voteTo);
-            voteFileWrite.write("\n");
+            voteFileWrite.flush();
+            voteFileWrite.write(System.lineSeparator());
+            voteFileWrite.flush();
         }catch (IOException e) {
             return false;
         }
@@ -161,7 +174,11 @@ public class Storage {
         }
         if (newFile) {
             try {
-                logFileWrite.write("Index\tTerm\tVariableName\tValue\n");
+                logFileWrite.flush();
+                logFileWrite.write("Index\tTerm\tVariableName\tValue");
+                logFileWrite.flush();
+                logFileWrite.write(System.lineSeparator());
+                voteFileWrite.flush();
             }catch (IOException ex) {
                 ex.printStackTrace();
             }

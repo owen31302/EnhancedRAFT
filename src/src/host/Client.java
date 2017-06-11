@@ -149,9 +149,16 @@ public class Client {
                     }
                     try {
                         String receivedMessage = (String)inStream.readObject();
+                        if (Objects.equals(receivedMessage.toLowerCase(), "yes")) {
+                            System.out.println("commit successed");
+                        }else if (Objects.equals(receivedMessage.toLowerCase(), "no")){
+                            System.out.println("commit rejected");
+                        }else {
+
+                        }
+
                     }catch (ClassNotFoundException x) {
                         System.out.println("received is not String object");
-                        continue;
                     }
 
                     socket.close();
