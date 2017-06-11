@@ -108,9 +108,9 @@ public class Leader extends Observable implements Runnable {
         return _isFindNextIndex;
     }
     public HashMap<String , Integer> get_nextIndex(){
-        for(Map.Entry<String, Integer> a : _nextIndex.entrySet()){
-            System.out.println("hostName:" + a.getKey() + " index:" + a.getValue());
-        }
+//        for(Map.Entry<String, Integer> a : _nextIndex.entrySet()){
+//            System.out.println("hostName:" + a.getKey() + " index:" + a.getValue());
+//        }
         return _nextIndex;
     }
 

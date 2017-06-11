@@ -49,6 +49,10 @@ public class Host extends Thread implements Observer{
         charactor = CharacterManagement.FOLLOWER;
         follower = new Follower(stateManager);
         follower.addObserver(this);
+        candidate = new Candidate(this);
+        candidate.addObserver(this);
+//        leader = new Leader(this, candidate.get_tcp_ReplyMsg_All());
+//        leader.addObserver(this);
 
         aServer = new ServerSocket(0);
         System.out.println(InetAddress.getLocalHost().getHostAddress() + " at port number: " + aServer.getLocalPort());
@@ -82,8 +86,8 @@ public class Host extends Thread implements Observer{
                 currentTerm++;
                 follower.leave();
                 charactor = CharacterManagement.CANDIDATE;
-                candidate = new Candidate(this);
-                candidate.addObserver(this);
+//                candidate = new Candidate(this);
+//                candidate.addObserver(this);
                 Thread candidateThread = new Thread(candidate);
                 candidateThread.setDaemon(true);
                 candidateThread.start();
@@ -92,7 +96,7 @@ public class Host extends Thread implements Observer{
                 System.out.println("Change from Candidate to Leader.");
                 candidate.leave();
                 charactor = CharacterManagement.LEADER;
-                // leader should take care of non-up-to-date followers.
+                //leader should take care of non-up-to-date followers.
                 leader = new Leader(this, candidate.get_tcp_ReplyMsg_All());
                 leader.addObserver(this);
                 Thread leaderThread = new Thread(leader);
@@ -287,12 +291,14 @@ public class Host extends Thread implements Observer{
                         System.out.println(hostManager);
                         followerThread = new Thread( follower );
                         followerThread.setDaemon(true);
-                        followerThread.start();
+                       // followerThread.start();
                         break;
 
                     case Protocol.CHANGEVALUE:
                         String stateName = (String)oIn.readObject();
                         int newValue = oIn.readInt();
+                        oOut.writeInt(Protocol.ACKOWLEDGEMENT);
+                        oOut.flush();
                         if (leader.addState(new host.State(stateName, newValue))) {
                             oOut.writeObject("State changed.");
                         }
@@ -328,14 +334,23 @@ public class Host extends Thread implements Observer{
                                 int lastLogIndex = Integer.parseInt(aurgments[2]);
                                 int lastLogTerm = Integer.parseInt(aurgments[3]);
                                 synchronized (votedTerm) {
+                                    if (currentTerm < candidateTerm && charactor != CharacterManagement.FOLLOWER) {
+                                        if (leader != null) {
+                                            leader.leave();
+                                        }
+                                        candidate.leave();
+                                        charactor = CharacterManagement.FOLLOWER;
+                                        followerThread = new Thread( follower );
+                                        followerThread.setDaemon(true);
+                                        followerThread.start();
+                                    }
                                     if (votedTerm < candidateTerm && currentTerm <= candidateTerm
                                             && stateManager.getLastIndex() <= lastLogIndex && stateManager.getLastLog().getTerm() <= lastLogTerm) {
                                         votedTerm = candidateTerm;
                                         currentTerm = candidateTerm;
                                         //SignedMessage signedMessage = new SignedMessage(RPCs.REQUESTVOTE, "Yes", privateKey);
-                                        System.out.println("aaa");
                                         tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.REQUESTVOTE, "Yes", privateKey));
-                                        System.out.println("grant vote");
+                                       // System.out.println("grant vote");
                                     }
                                 }
                                 break;
@@ -349,10 +364,20 @@ public class Host extends Thread implements Observer{
                                 int leaderCommit = Integer.parseInt(aurgments[5]);
 
                                 if (currentTerm <= leaderTerm) {
-                                    charactor = CharacterManagement.FOLLOWER;
+                                    if (charactor != CharacterManagement.FOLLOWER) {
+                                        charactor = CharacterManagement.FOLLOWER;
+                                        followerThread = new Thread( follower );
+                                        followerThread.setDaemon(true);
+                                        followerThread.start();
+                                    }
                                     hostManager.setLeaderAddress(leaderName);
-
-                                    if (stateManager.getLastIndex() <= leaderTerm && stateManager.getLog(preLogIndex).getTerm() == preLogTerm) {
+                                    System.out.println(stateManager.getLastIndex() <= leaderTerm);
+                                    System.out.println(stateManager.getLog(preLogIndex).getTerm() == preLogTerm);
+                                    System.out.println(stateManager.getLastIndex());
+                                    System.out.println(leaderTerm);
+                                    System.out.println(preLogTerm);
+                                    System.out.println(stateManager.getLog(preLogIndex).getTerm());
+                                    if (stateManager.getLastIndex() >= leaderTerm && stateManager.getLog(preLogIndex).getTerm() == preLogTerm) {
                                         if (!newState.equals("")) {
                                             String[] stateParameter = newState.split("->");
                                             stateManager.appendAnEntry(new host.State(stateParameter[0], Integer.parseInt(stateParameter[1])), currentTerm);

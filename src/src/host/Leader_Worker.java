@@ -52,6 +52,13 @@ public class Leader_Worker implements Runnable {
                 // new 一個thread，然後去append看看是否成功，如果成功代表我找到相同位置
                 // 沒有成功，index要decrement，然後再試一次
                 index = _leader.get_nextIndex().get(_hostName);
+                if (index == 0) {
+                    try {
+                        Thread.sleep(300000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
                 prelogEntry = _leader.get_host().getStateManager().getLog(index-1);
                 appendEntryArray[2] = String.valueOf(prelogEntry.getIndex());
                 appendEntryArray[3] = String.valueOf(prelogEntry.getTerm());
@@ -59,6 +66,9 @@ public class Leader_Worker implements Runnable {
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
                 rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
+                if (rsaPublicKey == null) {
+                    System.out.println("null key");
+                }
                 msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                 if(result) {
                     if (msg.equals(RPCs.SUCCESS)) {
