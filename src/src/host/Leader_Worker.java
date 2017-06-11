@@ -143,7 +143,7 @@ public class Leader_Worker implements Runnable {
                 System.out.println("LeaderJobs.HEARTBEAT");
                 // 如果沒新東西就heartbeat
                 appendEntry = String.join(",", appendEntryArray);
-                signedMessage = new SignedMessage(RPCs.HEARTBEAT, appendEntry, _leader.get_host().getPrivateKey());
+                signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
                 if(result){
                     rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
