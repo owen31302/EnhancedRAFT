@@ -178,7 +178,7 @@ public class Storage {
                 logFileWrite.write("Index\tTerm\tVariableName\tValue");
                 logFileWrite.flush();
                 logFileWrite.write(System.lineSeparator());
-                voteFileWrite.flush();
+                logFileWrite.flush();
             }catch (IOException ex) {
                 ex.printStackTrace();
             }
