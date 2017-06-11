@@ -116,11 +116,12 @@ public class Leader_Worker implements Runnable {
                 System.out.println("LeaderJobs.APPENDLOG");
                 // 前面兩個都通過了，才會執行user request
                 // 如果投票一直沒過，follower就不斷覆蓋同個位置上的log
-                index = _leader.get_host().getCommitIndex()+1;
-                prelogEntry = _leader.get_host().getStateManager().getLog(index-1);
+                //index = _leader.get_host().getCommitIndex()+1;
+                //prelogEntry = _leader.get_host().getStateManager().getLog(index-1);
                 State state = _leader.getState();
-                appendEntryArray[2] = String.valueOf(prelogEntry.getIndex());
-                appendEntryArray[3] = String.valueOf(prelogEntry.getTerm());
+                _host.getStateManager().appendAnEntry(state, _host.getCurrentTerm());
+                //appendEntryArray[2] = String.valueOf(prelogEntry.getIndex());
+                //appendEntryArray[3] = String.valueOf(prelogEntry.getTerm());
                 appendEntryArray[4] = state.toString();
                 appendEntry = String.join(",", appendEntryArray);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
