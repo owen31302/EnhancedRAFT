@@ -58,51 +58,6 @@ public class Client {
                     System.out.print(s.getHostPort());
                     System.out.println(".");
                 }
-            }else if (Objects.equals(cmdCode, "byzantineenable")) {
-                HostAddress leader = findLeader();
-                if (leader == null) {
-                    System.out.println("currently no leader");
-                    continue;
-                }
-                try{
-                    Socket socket = new Socket(leader.getHostIp(), leader.getHostPort());
-                    ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
-                    ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
-                    outStream.flush();
-                    outStream.writeInt(Protocol.EnableByzantine);
-                    outStream.flush();
-                    int waitingForACK = inStream.readInt();
-                    if(waitingForACK != Protocol.ACKOWLEDGEMENT){
-                        System.out.print("ACK NOT RECEIVED\n");
-                        // maybe need to try again
-                    }
-                    socket.close();
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-
-            }else if (Objects.equals(cmdCode, "byzantinedisable")) {
-                HostAddress leader = findLeader();
-                if (leader == null) {
-                    System.out.println("currently no leader");
-                    continue;
-                }
-                try{
-                    Socket socket = new Socket(leader.getHostIp(), leader.getHostPort());
-                    ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
-                    ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
-                    outStream.flush();
-                    outStream.writeInt(Protocol.DisableByzantine);
-                    outStream.flush();
-                    int waitingForACK = inStream.readInt();
-                    if(waitingForACK != Protocol.ACKOWLEDGEMENT){
-                        System.out.print("ACK NOT RECEIVED\n");
-                        // maybe need to try again
-                    }
-                    socket.close();
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
             }else if (Objects.equals(cmdCode, "quit")) {
                 // no need to do this
                 // could just ctrl + C
@@ -113,8 +68,10 @@ public class Client {
                 userInput.trim();
                 String[] inputParts = userInput.split(" ");
                 int newValue;
-                if (inputParts.length != 3) {
-                    System.out.println("Please input: changeValue <state name> <new value>");
+                boolean byzantine = false;
+                if (inputParts.length != 3 && inputParts.length != 4) {
+                    System.out.println("parameter not fit");
+                    System.out.println("Please input: changeValue <state name> <new value> <?true/false>");
                     continue;
                 }
                 try {
@@ -125,6 +82,16 @@ public class Client {
                 }
                 if ((inputParts[1] == null) || Objects.equals(inputParts[1], " ")) {
                     inputParts[1] = "default";
+                }
+                if (inputParts.length == 4) {
+                    if (Objects.equals(inputParts[3].toLowerCase(), "false")) {
+                        byzantine = false;
+                    }else if (Objects.equals(inputParts[3].toLowerCase(), "true")) {
+                        byzantine = true;
+                    }else {
+                        System.out.println("Please input: changeValue <state name> <new value> <?true/false>");
+                        continue;
+                    }
                 }
                 HostAddress leader = findLeader();
                 if (leader == null) {
@@ -137,6 +104,8 @@ public class Client {
                     ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
                     outStream.flush();
                     outStream.writeInt(Protocol.CHANGEVALUE);
+                    outStream.flush();
+                    outStream.writeObject(byzantine);
                     outStream.flush();
                     outStream.writeObject(inputParts[1]);
                     outStream.flush();
