@@ -52,7 +52,7 @@ public class Leader extends Observable implements Runnable {
 
         _closed = false;
         while (!_closed){
-            _votes = 0;
+            _votes = 1;
             HashMap<String, Thread> threads = new HashMap<>();
             for(String hostname : _hostnames){
                 if(!hostname.equals(_host.getHostManager().getMyHostName())){
