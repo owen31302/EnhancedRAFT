@@ -62,6 +62,50 @@ public class Client {
                 // no need to do this
                 // could just ctrl + C
                 break;
+            }if (Objects.equals(cmdCode, "byzantineenable")) {
+                for (HostAddress s: serverInfos) {
+                    try{
+                        Socket socket = new Socket(s.getHostIp(), s.getHostPort());
+                        ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
+                        outStream.flush();
+                        outStream.writeInt(Protocol.EnableByzantine);
+                        outStream.flush();
+                        ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
+                        if(inStream.readInt() != Protocol.ACKOWLEDGEMENT){
+                            System.out.print("ACK NOT RECEIVED\n");
+                            // maybe need to try again
+                        }
+                        socket.close();
+                    }catch (IOException e){
+                        System.out.print("Byzantine enable failed on :");
+                        System.out.println(s.getHostIp());
+                    }
+                }
+            }if (Objects.equals(cmdCode, "byzantinedisable")) {
+                for (HostAddress s: serverInfos) {
+                    try{
+                        Socket socket = new Socket(s.getHostIp(), s.getHostPort());
+                        ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
+                        outStream.flush();
+                        outStream.writeInt(Protocol.EnableByzantine);
+                        outStream.flush();
+                        ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
+                        if(inStream.readInt() != Protocol.ACKOWLEDGEMENT){
+                            System.out.print("ACK NOT RECEIVED\n");
+                        }
+                        socket.close();
+                    }catch (IOException e){
+                        System.out.print("Byzantine disable failed on :");
+                        System.out.println(s.getHostIp());
+                    }
+                }
+            }if (Objects.equals(cmdCode, "help")) {
+                System.out.println("changevalue <state name> <state value> <?true/false>");
+                System.out.println("byzantinedisable");
+                System.out.println("byzantineenable");
+                System.out.println("quit");
+                System.out.println("help");
+                System.out.println("add (<host ip>, <host port>)");
             }else if (Objects.equals(cmdCode, "changeValue")) {
                 // input goes like
                 // changevalue <state name> <new value>
@@ -200,6 +244,8 @@ public class Client {
             return "quit";
         }else if (input.length() >= "changevalue".length() && input.substring(0, "changevalue".length()).toLowerCase().equals("changevalue")){
             return "changeValue";
+        }else if (input.length() >= "help".length() && input.substring(0, "help".length()).toLowerCase().equals("help")){
+            return "help";
         }else{
             return "";
         }
