@@ -44,12 +44,18 @@ public class StateManager {
     public boolean commitEntry(int at) {
         LogEntry logToCommit = stateLog.get(at);
         if (logToCommit == null) {
+            System.out.println("no found");
             return false;
         }
         if (commitFailEnable) {
             return false;
         }else if (fileStoreHandler.storeNewValue(logToCommit)){
-            states.get(stateLog.get(at).getState().getStateName()).changeState(stateLog.get(at).getState().getStateValue());
+            System.out.println(" found");
+            LogEntry temp = stateLog.get(at);
+            System.out.println("state: " + temp.getState());
+            System.out.println("at: " + at);
+            //states.get(stateLog.get(at).getState().getStateName()).changeState(stateLog.get(at).getState().getStateValue());
+            states.get(temp.getState().getStateName()).changeState(temp.getState().getStateValue());
             stateLog.get(at).commitEntry();
             return true;
         }else {
@@ -63,7 +69,11 @@ public class StateManager {
      *@param term term
      */
     public void appendAnEntry(State newState, int term){
+        System.out.println("state in:" + newState);
+        System.out.println("size before:" + stateLog.size());
         stateLog.add(new LogEntry(newState, term, stateLog.size()));
+        System.out.println("size after:" + stateLog.size());
+        System.out.println("eeeee:" + stateLog.get(stateLog.size()-1));
     }
 
     /**
