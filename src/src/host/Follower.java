@@ -1,5 +1,7 @@
 package host;
 import java.util.Observable;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by owen on 5/26/17.
@@ -24,18 +26,28 @@ public class Follower extends Observable implements Runnable {
     public void run() {
         System.out.println("I am Follower!");
         _closed = false;
-        long startTime = System.currentTimeMillis();
+        /*long startTime = System.currentTimeMillis();
         while(_time>0){
             long endTime   = System.currentTimeMillis();
             _time -= (endTime - startTime);
             startTime = endTime;
-        }
-        if(!_closed){
-            //System.out.println("Changed!");
-            resetTimer();
-            setChanged();
-            notifyObservers(CharacterManagement.F2C);
-        }
+        }*/
+
+        Timer _timer = new Timer();
+        int duration = 10;
+        _timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                _time -= duration;
+                if(_time < 0 && !_closed){
+                    //System.out.println("Changed!");
+                    resetTimer();
+                    _timer.cancel();
+                    setChanged();
+                    notifyObservers(CharacterManagement.F2C);
+                }
+            }
+        }, 0, duration);
     }
 
     public void leave(){

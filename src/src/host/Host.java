@@ -292,7 +292,7 @@ public class Host extends Thread implements Observer{
                         System.out.println(hostManager);
                         followerThread = new Thread( follower );
                         followerThread.setDaemon(true);
-                        //followerThread.start();
+                        followerThread.start();
                         break;
 
                     case Protocol.CHANGEVALUE:
