@@ -33,6 +33,7 @@ public class Leader extends Observable implements Runnable {
     public void run() {
 
         System.out.println("I am Leader!");
+        _host.getHostManager().setLeaderAddress(_host.getHostName());
         // (1)  get the latest log index for each host
         //      update the log for non-up-to-date hosts
         //      1. initial each log index to the latest index (done in constructor)

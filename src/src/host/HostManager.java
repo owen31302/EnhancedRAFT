@@ -140,12 +140,14 @@ public class HostManager {
 
     public void setLeaderAddress(String leaderName){
         leaderAddress = hostList.get(leaderName);
+        System.out.println("11 " + leaderAddress.getHostName());
     }
     /**
      * This method returns leader's information.
      * @return leader's address
      */
     public HostAddress getLeaderAddress(){
+        System.out.println(leaderAddress.getHostName());
         return leaderAddress;
     }
 

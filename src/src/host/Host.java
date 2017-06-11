@@ -371,22 +371,22 @@ public class Host extends Thread implements Observer{
                                         followerThread.start();
                                     }
                                     hostManager.setLeaderAddress(leaderName);
-                                    System.out.println(stateManager.getLastIndex() <= leaderTerm);
-                                    System.out.println(stateManager.getLog(preLogIndex).getTerm() == preLogTerm);
-                                    System.out.println(stateManager.getLastIndex());
-                                    System.out.println(leaderTerm);
-                                    System.out.println(preLogTerm);
-                                    System.out.println(stateManager.getLog(preLogIndex).getTerm());
-                                    if (stateManager.getLastIndex() >= leaderTerm && stateManager.getLog(preLogIndex).getTerm() == preLogTerm) {
+//                                    System.out.println(stateManager.getLastIndex() <= leaderTerm);
+//                                    System.out.println(stateManager.getLog(preLogIndex).getTerm() == preLogTerm);
+//                                    System.out.println(stateManager.getLastIndex());
+//                                    System.out.println(leaderTerm);
+//                                    System.out.println(preLogTerm);
+//                                    System.out.println(stateManager.getLog(preLogIndex).getTerm());
+                                    if (stateManager.getLastIndex() >= preLogIndex && stateManager.getLog(preLogIndex).getTerm() == preLogTerm) {
                                         if (!newState.equals("")) {
                                             String[] stateParameter = newState.split("->");
-                                            stateManager.appendAnEntry(new host.State(stateParameter[0], Integer.parseInt(stateParameter[1])), currentTerm);
-                                            tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.SUCCESS, privateKey));
+                                            follower.appendAnEntry(new host.State(stateParameter[0], Integer.parseInt(stateParameter[1])), currentTerm);
+                                            for (int ii = commitIndex + 1; ii < leaderCommit; ii++) {
+                                                stateManager.commitEntry(ii);
+                                                System.out.println("123");
+                                            }
                                         }
-                                        for (int ii = commitIndex + 1; ii < leaderCommit; ii++) {
-                                            stateManager.commitEntry(ii);
-                                            System.out.println();
-                                        }
+                                        tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.SUCCESS, privateKey));
                                     }
                                     else {
                                         tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.FAIL, privateKey));

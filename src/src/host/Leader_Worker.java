@@ -52,14 +52,16 @@ public class Leader_Worker implements Runnable {
                 // new 一個thread，然後去append看看是否成功，如果成功代表我找到相同位置
                 // 沒有成功，index要decrement，然後再試一次
                 index = _leader.get_nextIndex().get(_hostName);
-                if (index == 0) {
-                    try {
-                        Thread.sleep(300000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
+//                if (index == 0) {
+//                    try {
+//                        Thread.sleep(300000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+                System.out.println("index:" + index);
                 prelogEntry = _leader.get_host().getStateManager().getLog(index-1);
+                System.out.println("Log Entry:" + prelogEntry);
                 appendEntryArray[2] = String.valueOf(prelogEntry.getIndex());
                 appendEntryArray[3] = String.valueOf(prelogEntry.getTerm());
                 appendEntry = String.join(",", appendEntryArray);
@@ -143,6 +145,7 @@ public class Leader_Worker implements Runnable {
                 System.out.println("LeaderJobs.HEARTBEAT");
                 // 如果沒新東西就heartbeat
                 appendEntry = String.join(",", appendEntryArray);
+                System.out.println("appendEntry:" + appendEntry);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
                 if(result){
