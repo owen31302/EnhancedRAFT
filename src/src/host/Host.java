@@ -42,7 +42,7 @@ public class Host extends Thread implements Observer{
 
     public Host() throws IOException {
         hostName = InetAddress.getLocalHost().getHostAddress();
-        stateManager = new StateManager(new String[]{"x", "y", "z"});
+        stateManager = new StateManager(new String[]{"x", "y", "z"}, hostName);
         currentTerm = 0;
         commitIndex = stateManager.getLastIndex();
         votedTerm = 0;

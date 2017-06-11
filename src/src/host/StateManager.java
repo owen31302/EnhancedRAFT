@@ -10,8 +10,9 @@ public class StateManager {
     private HashMap<String, State> states;
     private Storage fileStoreHandler;
     private boolean commitFailEnable = false;
+//    private String hostName;
 
-    StateManager(String[] stateName){
+    StateManager(String[] stateName, String hostName){
         stateLog = new ArrayList<LogEntry>(16);
         states = new HashMap<>();
 
@@ -24,8 +25,8 @@ public class StateManager {
             stateLog.add(initialLog);
             i++;
         }
-
-        this.fileStoreHandler = new Storage();
+//        this.hostName = hostName;
+        this.fileStoreHandler = new Storage(hostName);
         // reconver logentry from disk
        // stateLog.addAll(Arrays.asList(fileStoreHandler.getAllCommitedValue()));
     }
