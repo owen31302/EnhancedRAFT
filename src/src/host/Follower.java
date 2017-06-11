@@ -31,7 +31,8 @@ public class Follower extends Observable implements Runnable {
             startTime = endTime;
         }
         if(!_closed){
-            System.out.println("Changed!");
+            //System.out.println("Changed!");
+            resetTimer();
             setChanged();
             notifyObservers(CharacterManagement.F2C);
         }

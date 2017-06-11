@@ -251,6 +251,7 @@ public class Host extends Thread implements Observer{
                         oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
                         System.out.println(hostManager);
+                        System.out.println("New Follower 1");
                         followerThread = new Thread( follower );
                         followerThread.setDaemon(true);
                         followerThread.start();
@@ -289,9 +290,10 @@ public class Host extends Thread implements Observer{
                         oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
                         System.out.println(hostManager);
+                        System.out.println("New Follower 2");
                         followerThread = new Thread( follower );
                         followerThread.setDaemon(true);
-                        //followerThread.start();
+                        followerThread.start();
                         break;
 
                     case Protocol.CHANGEVALUE:
@@ -340,6 +342,7 @@ public class Host extends Thread implements Observer{
                                         }
                                         candidate.leave();
                                         charactor = CharacterManagement.FOLLOWER;
+                                        System.out.println("New Follower 3");
                                         followerThread = new Thread( follower );
                                         followerThread.setDaemon(true);
                                         followerThread.start();
@@ -367,6 +370,7 @@ public class Host extends Thread implements Observer{
                                 if (currentTerm <= leaderTerm) {
                                     if (charactor != CharacterManagement.FOLLOWER) {
                                         charactor = CharacterManagement.FOLLOWER;
+                                        System.out.println("New Follower 4");
                                         followerThread = new Thread( follower );
                                         followerThread.setDaemon(true);
                                         followerThread.start();
