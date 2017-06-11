@@ -122,4 +122,12 @@ public class SignedMessage implements Serializable {
     public String getPlanText(Key k) {
         return decrypt(k, encryptedMessageContent);
     }
+
+    /**
+     * set message type
+     * @param messageType
+     */
+    public void setMessageType(String messageType){
+        this.messageType = messageType;
+    }
 }

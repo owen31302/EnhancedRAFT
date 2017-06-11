@@ -2,6 +2,7 @@ package host;
 
 import Communicator.OnewayCommunicationPackage;
 import Communicator.TCP_Communicator;
+import Communicator.TCP_ReplyMsg_All;
 import signedMethods.Keys;
 import signedMethods.SignedMessage;
 
@@ -40,6 +41,7 @@ public class Host extends Thread implements Observer{
     private Thread followerThread;
     private Integer votedTerm;
     private boolean bTolerance;
+    private ForwardCollector fCollector;
 
     public Host() throws IOException {
         hostName = InetAddress.getLocalHost().getHostAddress();
@@ -53,6 +55,7 @@ public class Host extends Thread implements Observer{
         candidate = new Candidate(this);
         candidate.addObserver(this);
         bTolerance = false;
+        fCollector = new ForwardCollector(hostManager);
 //        leader = new Leader(this, candidate.get_tcp_ReplyMsg_All());
 //        leader.addObserver(this);
 
@@ -352,6 +355,17 @@ public class Host extends Thread implements Observer{
                                 break;
 
                             case RPCs.APPENDENTRY:
+                                if (planText == null) {
+                                     break;
+                                }
+
+                                if (aurgments[4] != null) {
+                                    receivedMSG.setMessageType(RPCs.FORWARD);
+                                    tempTCP.initSendToAll(hostManager, new TCP_ReplyMsg_All(), receivedMSG);
+                                    planText = fCollector.getResult();
+                                    aurgments = planText.split(",");
+                                }
+
                                 follower.receivedHeartBeat();
                                 int leaderTerm = Integer.parseInt(aurgments[0]);
                                 String leaderName = aurgments[1];
@@ -398,6 +412,11 @@ public class Host extends Thread implements Observer{
                                     }
                                 }
 
+                                break;
+
+                            case RPCs.FORWARD:
+                                fCollector.putIntoCollection(receivedMSG);
+                                tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.FORWARD, "Yes", privateKey));
                                 break;
                         }
                         break;

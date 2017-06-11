@@ -200,4 +200,8 @@ public class HostManager {
         }
         return null;
     }
+
+    public RSAPublicKey getLeaderPublicKey(){
+        return leaderAddress.getPublicKey();
+    }
 }
