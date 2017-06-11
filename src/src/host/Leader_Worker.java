@@ -65,22 +65,21 @@ public class Leader_Worker implements Runnable {
                 appendEntry = String.join(",", appendEntryArray);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
-                rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
-                if (rsaPublicKey == null) {
-                    System.out.println("null key");
-                }
-                msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                 if(result) {
+                    rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
+                    msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                     if (msg.equals(RPCs.SUCCESS)) {
-                        System.out.println("RPCs.SUCCESS");
+                        System.out.println("RPCs.SUCCESS 1");
                         _leader.get_isFindNextIndex().add(_hostName);
                     }else if(msg.equals(RPCs.FAIL)){
-                        System.out.println("RPCs.FAIL");
+                        System.out.println("RPCs.FAIL 1");
                         int nextIndex = _leader.get_nextIndex().get(_hostName);
                         _leader.get_nextIndex().put(_hostName, nextIndex - 1);
                     }else{
-                        System.out.println("Some error.");
+                        System.out.println("Some error 1");
                     }
+                }else {
+                    System.out.println("Result False 1");
                 }
                 break;
             case LeaderJobs.KEEPUPLOG:
@@ -95,18 +94,20 @@ public class Leader_Worker implements Runnable {
                 appendEntry = String.join(",", appendEntryArray);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
-                rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
-                msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                 if(result){
+                    rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
+                    msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                     if (msg.equals(RPCs.SUCCESS)) {
-                        System.out.println("RPCs.SUCCESS");
+                        System.out.println("RPCs.SUCCESS 2");
                         _leader.get_nextIndex().put(_hostName, index+1);
                     }else if(msg.equals(RPCs.FAIL)){
-                        System.out.println("RPCs.FAIL");
+                        System.out.println("RPCs.FAIL 2");
                         _leader.get_isFindNextIndex().remove(_hostName);
                     }else{
-                        System.out.println("Some error.");
+                        System.out.println("Some error 2");
                     }
+                }else {
+                    System.out.println("Result False 2");
                 }
                 break;
             case LeaderJobs.APPENDLOG:
@@ -122,19 +123,20 @@ public class Leader_Worker implements Runnable {
                 appendEntry = String.join(",", appendEntryArray);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
-                rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
-                msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                 if(result){
+                    rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
+                    msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                     if (msg.equals(RPCs.SUCCESS)) {
-                        System.out.println("RPCs.SUCCESS");
+                        System.out.println("RPCs.SUCCESS 3");
                         _leader.set_votes();
                     }else if(msg.equals(RPCs.FAIL)){
-                        System.out.println("RPCs.FAIL");
+                        System.out.println("RPCs.FAIL 3");
                         _leader.get_isFindNextIndex().remove(_hostName);
                     }else{
-                        System.out.println("Some error.");
+                        System.out.println("Some error 3");
                     }
-
+                }else {
+                    System.out.println("Result False 3");
                 }
                 break;
             case LeaderJobs.HEARTBEAT:
@@ -143,17 +145,19 @@ public class Leader_Worker implements Runnable {
                 appendEntry = String.join(",", appendEntryArray);
                 signedMessage = new SignedMessage(RPCs.HEARTBEAT, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
-                rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
-                msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                 if(result){
+                    rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
+                    msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                     if (msg.equals(RPCs.SUCCESS)) {
-                        System.out.println("RPCs.SUCCESS");
+                        System.out.println("RPCs.SUCCESS 4");
                     }else if(msg.equals(RPCs.FAIL)){
-                        System.out.println("RPCs.FAIL");
+                        System.out.println("RPCs.FAIL 4");
                         _leader.get_isFindNextIndex().remove(_hostName);
                     }else{
-                        System.out.println("Some error.");
+                        System.out.println("Some error 4");
                     }
+                }else {
+                    System.out.println("Result False 4");
                 }
                 break;
         }
