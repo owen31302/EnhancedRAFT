@@ -110,10 +110,15 @@ public class Storage {
      */
     public boolean storeVote(int currentTerm, int voteTo) {
         try {
+            voteFileWrite.flush();
             voteFileWrite.write(currentTerm);
+            voteFileWrite.flush();
             voteFileWrite.write("\t");
+            voteFileWrite.flush();
             voteFileWrite.write(voteTo);
+            voteFileWrite.flush();
             voteFileWrite.write(System.lineSeparator());
+            voteFileWrite.flush();
         }catch (IOException e) {
             return false;
         }
@@ -173,6 +178,7 @@ public class Storage {
                 logFileWrite.write("Index\tTerm\tVariableName\tValue");
                 logFileWrite.flush();
                 logFileWrite.write(System.lineSeparator());
+                voteFileWrite.flush();
             }catch (IOException ex) {
                 ex.printStackTrace();
             }
