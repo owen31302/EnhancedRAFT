@@ -19,6 +19,7 @@ public class StateManager {
         for (String name: stateName) {
             State initializedState = new State(name, 0);
             LogEntry initialLog = new LogEntry(initializedState, 0, i);
+            initialLog.commitEntry();
             states.put(name, initializedState);
             stateLog.add(initialLog);
             i++;

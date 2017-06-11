@@ -44,7 +44,7 @@ public class Host extends Thread implements Observer{
         hostName = InetAddress.getLocalHost().getHostAddress();
         stateManager = new StateManager(new String[]{"x", "y", "z"});
         currentTerm = 0;
-        commitIndex = 0;
+        commitIndex = stateManager.getLastIndex();
         votedTerm = 0;
         charactor = CharacterManagement.FOLLOWER;
         follower = new Follower(stateManager);
@@ -291,7 +291,7 @@ public class Host extends Thread implements Observer{
                         System.out.println(hostManager);
                         followerThread = new Thread( follower );
                         followerThread.setDaemon(true);
-                       // followerThread.start();
+                        //followerThread.start();
                         break;
 
                     case Protocol.CHANGEVALUE:
@@ -356,6 +356,7 @@ public class Host extends Thread implements Observer{
                                 break;
 
                             case RPCs.APPENDENTRY:
+                                follower.receivedHeartBeat();
                                 int leaderTerm = Integer.parseInt(aurgments[0]);
                                 String leaderName = aurgments[1];
                                 int preLogIndex = Integer.parseInt(aurgments[2]);
@@ -381,12 +382,13 @@ public class Host extends Thread implements Observer{
                                         if (!newState.equals("")) {
                                             String[] stateParameter = newState.split("->");
                                             follower.appendAnEntry(new host.State(stateParameter[0], Integer.parseInt(stateParameter[1])), currentTerm);
-                                            for (int ii = commitIndex + 1; ii < leaderCommit; ii++) {
-                                                stateManager.commitEntry(ii);
-                                                System.out.println("123");
-                                            }
+                                        }
+                                        for (int ii = commitIndex + 1; ii < leaderCommit; ii++) {
+                                            stateManager.commitEntry(ii);
+                                            System.out.println("123");
                                         }
                                         tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.SUCCESS, privateKey));
+                                        System.out.println(stateManager.toString());
                                     }
                                     else {
                                         tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.FAIL, privateKey));

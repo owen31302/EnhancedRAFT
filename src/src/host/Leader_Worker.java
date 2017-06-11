@@ -125,6 +125,16 @@ public class Leader_Worker implements Runnable {
                         _host.getStateManager().appendAnEntry(state, _host.getCurrentTerm());
                     }else{
                         state = _host.getStateManager().getLastLog().getState();
+                        appendEntryArray[2] = String.valueOf(_host.getStateManager().getLog(_host.getStateManager().getLastIndex()-1).getIndex());
+                        appendEntryArray[3] = String.valueOf(_host.getStateManager().getLog(_host.getStateManager().getLastIndex()-1).getTerm());
+//                        String[] appendEntryArray = new String[]{
+//                                _host.getCurrentTerm().toString(),
+//                                _host.getHostName(),
+//                                String.valueOf(_host.getStateManager().getLastLog().getIndex()),
+//                                String.valueOf(_host.getStateManager().getLastLog().getTerm()),
+//                                "",
+//                                String.valueOf(_host.getCommitIndex())
+//                        };
                     }
                 }
                 //appendEntryArray[2] = String.valueOf(prelogEntry.getIndex());
