@@ -39,6 +39,7 @@ public class Host extends Thread implements Observer{
     private HostAddress myAddress;   // !!! to store my name, my ip, my port, my public key
     private Thread followerThread;
     private Integer votedTerm;
+    private boolean bTolerance;
 
     public Host() throws IOException {
         hostName = InetAddress.getLocalHost().getHostAddress();
@@ -51,6 +52,7 @@ public class Host extends Thread implements Observer{
         follower.addObserver(this);
         candidate = new Candidate(this);
         candidate.addObserver(this);
+        bTolerance = false;
 //        leader = new Leader(this, candidate.get_tcp_ReplyMsg_All());
 //        leader.addObserver(this);
 
@@ -288,11 +290,12 @@ public class Host extends Thread implements Observer{
                         break;
 
                     case Protocol.CHANGEVALUE:
+                        boolean byzantin = (boolean)oIn.readObject();
                         String stateName = (String)oIn.readObject();
                         int newValue = oIn.readInt();
                         oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
-                        if (leader.addState(new host.State(stateName, newValue))) {
+                        if (leader.addState(new host.State(stateName, newValue), byzantin)) {
                             oOut.writeObject("State changed.");
                         }
                         else {
@@ -374,6 +377,7 @@ public class Host extends Thread implements Observer{
 //                                    System.out.println(leaderTerm);
 //                                    System.out.println(preLogTerm);
 //                                    System.out.println(stateManager.getLog(preLogIndex).getTerm());
+
                                     if (stateManager.getLastIndex() >= preLogIndex && stateManager.getLog(preLogIndex).getTerm() == preLogTerm) {
                                         if (!newState.equals("")) {
                                             String[] stateParameter = newState.split("->");
@@ -381,7 +385,6 @@ public class Host extends Thread implements Observer{
                                             System.out.println(tempState);
                                             follower.appendAnEntry(tempState, currentTerm);
                                         }
-                                        System.out.println("commitIndex: " + commitIndex);
                                         while (commitIndex < leaderCommit) {
                                             stateManager.commitEntry(++commitIndex);
                                         }

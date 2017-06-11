@@ -20,9 +20,9 @@ public class StateManager {
         for (String name: stateName) {
             State initializedState = new State(name, 0);
             LogEntry initialLog = new LogEntry(initializedState, 0, i);
-            initialLog.commitEntry();
             states.put(name, initializedState);
             stateLog.add(initialLog);
+            commitEntry(i);
             i++;
         }
 //        this.hostName = hostName;
@@ -51,10 +51,7 @@ public class StateManager {
         if (commitFailEnable) {
             return false;
         }else if (fileStoreHandler.storeNewValue(logToCommit)){
-            System.out.println(" found");
             LogEntry temp = stateLog.get(at);
-            System.out.println("state: " + temp.getState());
-            System.out.println("at: " + at);
             //states.get(stateLog.get(at).getState().getStateName()).changeState(stateLog.get(at).getState().getStateValue());
             states.get(temp.getState().getStateName()).changeState(temp.getState().getStateValue());
             stateLog.get(at).commitEntry();
@@ -70,11 +67,7 @@ public class StateManager {
      *@param term term
      */
     public void appendAnEntry(State newState, int term){
-        System.out.println("state in:" + newState);
-        System.out.println("size before:" + stateLog.size());
         stateLog.add(new LogEntry(newState, term, stateLog.size()));
-        System.out.println("size after:" + stateLog.size());
-        System.out.println("eeeee:" + stateLog.get(stateLog.size()-1));
     }
 
     /**
@@ -122,8 +115,8 @@ public class StateManager {
     public String toString(){
         StringBuffer result = new StringBuffer();
         for (Map.Entry<String, State> a: states.entrySet()) {
-            result.append(a.toString() + ";");
+            result.append(a.getValue().toString() + ";");
         }
-        return result.toString().substring(0, result.length());
+        return result.toString().substring(0, result.length()-1);
     }
 }

@@ -11,4 +11,5 @@ public class RPCs {
     static final String SUCCESS = "SUCCESS";
     static final String FAIL = "FAIL";
     static final String BFAIL = "BFAIL";
+    static final String FORWARD = "FORWARD";
 }
