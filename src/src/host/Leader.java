@@ -17,7 +17,7 @@ public class Leader extends Observable implements Runnable {
     private TCP_ReplyMsg_All _tcp_replyMsg_all;
     private Set<String> _hostnames;
     private int _votes;
-    private Queue<State> _queue;
+    public Queue<State> _queue;
     public Lock _Lock;
 
     public Leader(Host host, TCP_ReplyMsg_All tcp_replyMsg_all){

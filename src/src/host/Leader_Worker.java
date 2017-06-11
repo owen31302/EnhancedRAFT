@@ -118,8 +118,15 @@ public class Leader_Worker implements Runnable {
                 // 如果投票一直沒過，follower就不斷覆蓋同個位置上的log
                 //index = _leader.get_host().getCommitIndex()+1;
                 //prelogEntry = _leader.get_host().getStateManager().getLog(index-1);
-                State state = _leader.getState();
-                _host.getStateManager().appendAnEntry(state, _host.getCurrentTerm());
+                State state = null;
+                synchronized (_leader._queue){
+                    if(!_leader._queue.isEmpty()){
+                        state = _leader.getState();
+                        _host.getStateManager().appendAnEntry(state, _host.getCurrentTerm());
+                    }else{
+                        state = _host.getStateManager().getLastLog().getState();
+                    }
+                }
                 //appendEntryArray[2] = String.valueOf(prelogEntry.getIndex());
                 //appendEntryArray[3] = String.valueOf(prelogEntry.getTerm());
                 appendEntryArray[4] = state.toString();
