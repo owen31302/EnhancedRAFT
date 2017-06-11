@@ -172,7 +172,7 @@ public class Host extends Thread implements Observer{
         @Override
         public void run() {
             try {
-                System.out.println("IP:" + aSocket.getInetAddress().getHostAddress());
+                System.out.println("From IP:" + aSocket.getInetAddress().getHostAddress());
                 if (RPCFlag && hostManager.isInHostList(aSocket.getInetAddress().getHostAddress())) {
                     command = Protocol.RPCREQUEST;
                 }
