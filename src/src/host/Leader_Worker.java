@@ -5,6 +5,7 @@ import Communicator.TCP_ReplyMsg_One;
 import signedMethods.SignedMessage;
 
 import javax.annotation.processing.SupportedSourceVersion;
+import java.security.interfaces.RSAPublicKey;
 
 /**
  * Created by Yu-Cheng Lin on 5/31/17.
@@ -33,6 +34,8 @@ public class Leader_Worker implements Runnable {
         LogEntry curlogEntry;
         String appendEntry;
         boolean result;
+        RSAPublicKey rsaPublicKey;
+        String msg;
 
         String[] appendEntryArray = new String[]{
                 _host.getCurrentTerm().toString(),
@@ -55,11 +58,13 @@ public class Leader_Worker implements Runnable {
                 appendEntry = String.join(",", appendEntryArray);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
+                rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
+                msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                 if(result) {
-                    if (tcp_replyMsg_one.getMessage().equals(RPCs.SUCCESS)) {
+                    if (msg.equals(RPCs.SUCCESS)) {
                         System.out.println("RPCs.SUCCESS");
                         _leader.get_isFindNextIndex().add(_hostName);
-                    }else if(tcp_replyMsg_one.getMessage().equals(RPCs.FAIL)){
+                    }else if(msg.equals(RPCs.FAIL)){
                         System.out.println("RPCs.FAIL");
                         int nextIndex = _leader.get_nextIndex().get(_hostName);
                         _leader.get_nextIndex().put(_hostName, nextIndex - 1);
@@ -80,11 +85,13 @@ public class Leader_Worker implements Runnable {
                 appendEntry = String.join(",", appendEntryArray);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
+                rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
+                msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                 if(result){
-                    if (tcp_replyMsg_one.getMessage().equals(RPCs.SUCCESS)) {
+                    if (msg.equals(RPCs.SUCCESS)) {
                         System.out.println("RPCs.SUCCESS");
                         _leader.get_nextIndex().put(_hostName, index+1);
-                    }else if(tcp_replyMsg_one.getMessage().equals(RPCs.FAIL)){
+                    }else if(msg.equals(RPCs.FAIL)){
                         System.out.println("RPCs.FAIL");
                         _leader.get_isFindNextIndex().remove(_hostName);
                     }else{
@@ -105,11 +112,13 @@ public class Leader_Worker implements Runnable {
                 appendEntry = String.join(",", appendEntryArray);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
+                rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
+                msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                 if(result){
-                    if (tcp_replyMsg_one.getMessage().equals(RPCs.SUCCESS)) {
+                    if (msg.equals(RPCs.SUCCESS)) {
                         System.out.println("RPCs.SUCCESS");
                         _leader.set_votes();
-                    }else if(tcp_replyMsg_one.getMessage().equals(RPCs.FAIL)){
+                    }else if(msg.equals(RPCs.FAIL)){
                         System.out.println("RPCs.FAIL");
                         _leader.get_isFindNextIndex().remove(_hostName);
                     }else{
@@ -124,10 +133,12 @@ public class Leader_Worker implements Runnable {
                 appendEntry = String.join(",", appendEntryArray);
                 signedMessage = new SignedMessage(RPCs.HEARTBEAT, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
+                rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
+                msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                 if(result){
-                    if (tcp_replyMsg_one.getMessage().equals(RPCs.SUCCESS)) {
+                    if (msg.equals(RPCs.SUCCESS)) {
                         System.out.println("RPCs.SUCCESS");
-                    }else if(tcp_replyMsg_one.getMessage().equals(RPCs.FAIL)){
+                    }else if(msg.equals(RPCs.FAIL)){
                         System.out.println("RPCs.FAIL");
                         _leader.get_isFindNextIndex().remove(_hostName);
                     }else{
