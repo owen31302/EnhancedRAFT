@@ -9,10 +9,10 @@ import java.util.*;
 public class Storage {
     private FileWriter logFileWrite;
     private File logFile;
-    private String logFilePath = "./logFile.txt";
+    private String logFilePath;
     private FileWriter voteFileWrite;
     private File voteFile;
-    private String voteFilePath = "./vote.txt";
+    private String voteFilePath;
 
 
     /**
@@ -149,7 +149,17 @@ public class Storage {
     /**
      * Initializer
      */
-    Storage() {
+    Storage(String hostName) {
+        // make dir
+
+        if (new File("./" + hostName).mkdir()) {
+
+        }else {
+            System.out.println("make directory failed");
+        }
+
+        logFilePath = "./" + hostName + "/logFile.txt";
+        voteFilePath = "./" + hostName + "/voteFile.txt";
         boolean newFile = false;
         // build the storage file
         try{
@@ -178,7 +188,7 @@ public class Storage {
                 logFileWrite.write("Index\tTerm\tVariableName\tValue");
                 logFileWrite.flush();
                 logFileWrite.write(System.lineSeparator());
-                voteFileWrite.flush();
+                logFileWrite.flush();
             }catch (IOException ex) {
                 ex.printStackTrace();
             }
