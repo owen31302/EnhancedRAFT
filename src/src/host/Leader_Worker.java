@@ -65,6 +65,7 @@ public class Leader_Worker implements Runnable {
                 appendEntryArray[2] = String.valueOf(prelogEntry.getIndex());
                 appendEntryArray[3] = String.valueOf(prelogEntry.getTerm());
                 appendEntry = String.join(",", appendEntryArray);
+                System.out.println("QQ1: " + appendEntry);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
                 if(result) {
@@ -94,6 +95,7 @@ public class Leader_Worker implements Runnable {
                 appendEntryArray[3] = String.valueOf(prelogEntry.getTerm());
                 appendEntryArray[4] = curlogEntry.getState().toString();
                 appendEntry = String.join(",", appendEntryArray);
+                System.out.println("QQ2: " + appendEntry);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
                 if(result){
@@ -141,12 +143,15 @@ public class Leader_Worker implements Runnable {
                 //appendEntryArray[3] = String.valueOf(prelogEntry.getTerm());
                 appendEntryArray[4] = state.toString();
                 appendEntry = String.join(",", appendEntryArray);
+                System.out.println("QQ3: " + appendEntry);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);
                 if(result){
                     rsaPublicKey = _host.getHostManager().getPublicKey(_hostName);
                     msg = tcp_replyMsg_one.getMessage().getPlanText(rsaPublicKey);
                     if (msg.equals(RPCs.SUCCESS)) {
+                        int currentIndex = _leader.get_nextIndex().get(_hostName);
+                        _leader.get_nextIndex().put(_hostName, currentIndex+1);
                         System.out.println("RPCs.SUCCESS 3");
                         _leader.set_votes();
                     }else if(msg.equals(RPCs.FAIL)){
@@ -163,6 +168,7 @@ public class Leader_Worker implements Runnable {
                 System.out.println("LeaderJobs.HEARTBEAT");
                 // 如果沒新東西就heartbeat
                 appendEntry = String.join(",", appendEntryArray);
+                System.out.println("QQ4: " + appendEntry);
                 System.out.println("appendEntry:" + appendEntry);
                 signedMessage = new SignedMessage(RPCs.APPENDENTRY, appendEntry, _leader.get_host().getPrivateKey());
                 result = tcp_communicator.initSendToOne(_leader.get_host().getHostManager().getHostAddress(_hostName), tcp_replyMsg_one, signedMessage);

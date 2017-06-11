@@ -383,7 +383,7 @@ public class Host extends Thread implements Observer{
                                             String[] stateParameter = newState.split("->");
                                             follower.appendAnEntry(new host.State(stateParameter[0], Integer.parseInt(stateParameter[1])), currentTerm);
                                         }
-                                        for (int ii = commitIndex + 1; ii < leaderCommit; ii++) {
+                                        for (int ii = commitIndex; ii < leaderCommit; ii++) {
                                             stateManager.commitEntry(ii);
                                             System.out.println("123");
                                         }
