@@ -82,17 +82,17 @@ public class SignedMessage implements Serializable {
                 byte[] resultBytes = cipher.doFinal(data_bytes);
                 return new String(resultBytes, "UTF-8");
             } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             } catch (NoSuchPaddingException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             } catch (BadPaddingException e) {
-                e.printStackTrace();
+               // e.printStackTrace();
             } catch (IllegalBlockSizeException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             } catch (InvalidKeyException e) {
-                e.printStackTrace();
+               // e.printStackTrace();
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+               // e.printStackTrace();
             }
         }
         return null;

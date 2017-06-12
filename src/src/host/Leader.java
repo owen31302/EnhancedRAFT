@@ -97,6 +97,7 @@ public class Leader extends Observable implements Runnable {
                 boolean result = _votes > _hostnames.size() / 2;
                 if(result){
                     _host.setCommitIndex(_host.getCommitIndex()+1);
+                    _host.getStateManager().commitEntry(_host.getCommitIndex());
                 }else{
                     _host.getStateManager().deleteLastEntry();
                 }

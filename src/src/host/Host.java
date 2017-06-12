@@ -55,7 +55,6 @@ public class Host extends Thread implements Observer{
         candidate = new Candidate(this);
         candidate.addObserver(this);
         bTolerance = false;
-        fCollector = new ForwardCollector(hostManager);
 //        leader = new Leader(this, candidate.get_tcp_ReplyMsg_All());
 //        leader.addObserver(this);
 
@@ -67,6 +66,7 @@ public class Host extends Thread implements Observer{
         myAddress = new HostAddress(hostName, InetAddress.getLocalHost().getHostAddress(), aServer.getLocalPort());
         myAddress.setPublicKey(publicKey); // !!! to be put into host_map
         hostManager = new HostManager(myAddress);
+        fCollector = new ForwardCollector(hostManager);
     }
 
     @Override
@@ -311,13 +311,13 @@ public class Host extends Thread implements Observer{
                         break;
 
                     case Protocol.EnableByzantine:
-                        bTolerance = (boolean)oIn.readObject();
+                        bTolerance = true;
                         oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
                         break;
 
                     case Protocol.DisableByzantine:
-                        bTolerance = (boolean)oIn.readObject();
+                        bTolerance = false;
                         oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
                         break;
@@ -336,7 +336,10 @@ public class Host extends Thread implements Observer{
                         String planText = receivedMSG.getPlanText(hostManager.getPublicKey(aSocket.getInetAddress().getHostAddress()));
                         System.out.println("Plan text: " + planText);
                         System.out.println("RPC: " + RPC);
-                        String[] aurgments = planText.split(",");
+                        String[] aurgments = new String[4];
+                        if (planText != null) {
+                            aurgments = planText.split(",");
+                        }
                         switch (RPC) {
                             case RPCs.REQUESTVOTE:
                                 follower.receivedHeartBeat();
@@ -367,10 +370,11 @@ public class Host extends Thread implements Observer{
 
                             case RPCs.APPENDENTRY:
                                 if (planText == null) {
-                                     break;
+                                    System.out.println("invalid key!");
+                                    break;
                                 }
 
-                                if (aurgments[4] != null && bTolerance) {
+                                if (aurgments[4] != null && bTolerance) { //if not heartbeat, forward
                                     receivedMSG.setMessageType(RPCs.FORWARD);
                                     tempTCP.initSendToAll(hostManager, new TCP_ReplyMsg_All(), receivedMSG);
                                     planText = fCollector.getResult();
@@ -396,12 +400,12 @@ public class Host extends Thread implements Observer{
                                     hostManager.setLeaderAddress(leaderName);
                                     currentTerm = leaderTerm;
                                     follower.receivedHeartBeat();
-                                    System.out.println(stateManager.getLastIndex());
-                                    System.out.println(stateManager.getLog(preLogIndex).getTerm() == preLogTerm);
-                                    System.out.println(preLogIndex);
-                                    System.out.println(leaderTerm);
-                                    System.out.println(preLogTerm);
-                                    System.out.println(stateManager.getLog(preLogIndex).getTerm());
+//                                    System.out.println(stateManager.getLastIndex());
+//                                    System.out.println(stateManager.getLog(preLogIndex).getTerm() == preLogTerm);
+//                                    System.out.println(preLogIndex);
+//                                    System.out.println(leaderTerm);
+//                                    System.out.println(preLogTerm);
+//                                    System.out.println(stateManager.getLog(preLogIndex).getTerm());
 
                                     if (stateManager.getLastIndex() >= preLogIndex && stateManager.getLog(preLogIndex).getTerm() == preLogTerm) {
                                         if (!newState.equals("")) {
@@ -426,6 +430,9 @@ public class Host extends Thread implements Observer{
                                 break;
 
                             case RPCs.FORWARD:
+                                if (charactor != CharacterManagement.LEADER) { //leader ignore forward msg
+                                    fCollector.putIntoCollection(receivedMSG);
+                                }
                                 fCollector.putIntoCollection(receivedMSG);
                                 tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.FORWARD, "Yes", privateKey));
                                 break;
