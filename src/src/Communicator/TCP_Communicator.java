@@ -37,7 +37,7 @@ public class TCP_Communicator {
 //            }
         }
         try {
-            Thread.sleep(200);
+            Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -45,6 +45,32 @@ public class TCP_Communicator {
         return tcp_ReplyMsg_All.getList_repliedHost().size() >= hostManager.getHostList().size() / 2 + 1;
     }
 
+    public boolean initSendToAll(HostManager hostManager, TCP_ReplyMsg_All tcp_ReplyMsg_All, SignedMessage msg, int time) {
+        boolean local_DEBUG = true;
+        boolean DEBUG = global_DEBUG? (local_DEBUG): global_DEBUG;
+        if (DEBUG) System.out.println("From communicator: enter initSendToAll()");
+        for (Map.Entry<String, HostAddress> a : hostManager.getHostList().entrySet()) {
+            HostAddress targetHost = a.getValue();
+            TCP_Worker worker = new TCP_Worker(targetHost, tcp_ReplyMsg_All, msg, targetHost.getPublicKey(), JobType.sentToAll);
+            worker.start();
+            if (DEBUG) System.out.println("From communicator: worker started with " + targetHost.getHostName() + ", " + targetHost.getHostIp());
+//            try {
+//                worker.join();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+        }
+        try {
+            if (time > 0){
+                Thread.sleep(time);
+            }
+            //Thread.sleep(time);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (DEBUG) System.out.println("From communicator: 200 ms timeout, return from initSendToOne()");
+        return tcp_ReplyMsg_All.getList_repliedHost().size() >= hostManager.getHostList().size() / 2 + 1;
+    }
     /**
      * Send message to a specific host. No check of message content in this method.
      * @param targetHost host address
@@ -62,7 +88,7 @@ public class TCP_Communicator {
         if (DEBUG) System.out.println("From communicator: worker started with " + targetHost.getHostName() + ", " + targetHost.getHostIp());
 
         try {
-            Thread.sleep(200);
+            Thread.sleep(300);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

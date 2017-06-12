@@ -31,17 +31,23 @@ public class ForwardCollector {
         String plantext = signedMessage.getPlanText(hostManager.getLeaderPublicKey());
         if (forwardMsg.containsKey(plantext)) {
             forwardMsg.put(plantext, forwardMsg.get(plantext)+1 );
+            System.out.println("put 1");
         }
-        else forwardMsg.put(plantext, 1);
+        else {
+            System.out.println("put 2");
+            forwardMsg.put(plantext, 1);
+        }
     }
 
     public synchronized String getResult(){
         int majoritySize = (hostManager.getHostList().size() - 1) / 2 + 1; // majority of followers, leader is not included
         for (Map.Entry<String, Integer> a: forwardMsg.entrySet()) {
-            if (a.getValue() > majoritySize) {
+            if (a.getValue() >= majoritySize) {
+                System.out.println("max: " + a.getValue());
                 return a.getKey();
             }
         }
+        System.out.println("not find");
         forwardMsg = new HashMap<>(); //clean old data;
         return null;
     }

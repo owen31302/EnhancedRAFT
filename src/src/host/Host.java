@@ -177,7 +177,7 @@ public class Host extends Thread implements Observer{
         @Override
         public void run() {
             try {
-                System.out.println("From IP:" + aSocket.getInetAddress().getHostAddress());
+                //System.out.println("From IP:" + aSocket.getInetAddress().getHostAddress());
                 if (RPCFlag && hostManager.isInHostList(aSocket.getInetAddress().getHostAddress())) {
                     command = Protocol.RPCREQUEST;
                 }
@@ -377,8 +377,13 @@ public class Host extends Thread implements Observer{
                                 if (!aurgments[4].equals("") && bTolerance) { //if not heartbeat, forward
                                 //    System.out.println(" aurgments[4] " + aurgments[4]);
                                     receivedMSG.setMessageType(RPCs.FORWARD);
-                                    tempTCP.initSendToAll(hostManager, new TCP_ReplyMsg_All(), receivedMSG);
+                                    TCP_Communicator newTCP = new TCP_Communicator();
+                                    newTCP.initSendToAll(hostManager, new TCP_ReplyMsg_All(), receivedMSG, -1);
+                                    Thread.sleep(100);
+                                    //System.out.println("===========================================================");
                                     planText = fCollector.getResult();
+                                    System.out.println("plantext: " + planText);
+                                   // System.out.println("************************************************************");
                                     aurgments = planText.split(",");
                                 }
 
@@ -412,7 +417,7 @@ public class Host extends Thread implements Observer{
                                         if (!newState.equals("")) {
                                             String[] stateParameter = newState.split("->");
                                             host.State tempState = new host.State(stateParameter[0], Integer.parseInt(stateParameter[1]));
-                                            System.out.println(tempState);
+                                            //System.out.println(tempState);
                                             follower.appendAnEntry(tempState, currentTerm);
                                         }
                                         while (commitIndex < leaderCommit) {
@@ -434,8 +439,9 @@ public class Host extends Thread implements Observer{
                                 if (charactor != CharacterManagement.LEADER) { //leader ignore forward msg
                                     fCollector.putIntoCollection(receivedMSG);
                                 }
-                                fCollector.putIntoCollection(receivedMSG);
+                               // System.out.println("#########################");
                                 tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.FORWARD, "Yes", privateKey));
+                                //System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&");
                                 break;
                         }
                         break;
@@ -456,6 +462,8 @@ public class Host extends Thread implements Observer{
                 e.printStackTrace();
             } catch (IOException e1) {
                 e1.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
         }

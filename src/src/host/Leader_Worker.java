@@ -198,7 +198,7 @@ public class Leader_Worker implements Runnable {
                     }
                 }else {
                     if (commentFlag){
-                        System.out.println("Result False 3");
+                        System.out.println("Result False 3: ");
                     }
                 }
                 break;
