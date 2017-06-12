@@ -62,7 +62,7 @@ public class Client {
                 // no need to do this
                 // could just ctrl + C
                 break;
-            }if (Objects.equals(cmdCode, "byzantineenable")) {
+            }else if (Objects.equals(cmdCode, "byzantineenable")) {
                 for (HostAddress s: serverInfos) {
                     try{
                         Socket socket = new Socket(s.getHostIp(), s.getHostPort());
@@ -81,7 +81,7 @@ public class Client {
                         System.out.println(s.getHostIp());
                     }
                 }
-            }if (Objects.equals(cmdCode, "byzantinedisable")) {
+            }else if (Objects.equals(cmdCode, "byzantinedisable")) {
                 for (HostAddress s: serverInfos) {
                     try{
                         Socket socket = new Socket(s.getHostIp(), s.getHostPort());
@@ -99,7 +99,7 @@ public class Client {
                         System.out.println(s.getHostIp());
                     }
                 }
-            }if (Objects.equals(cmdCode, "help")) {
+            }else if (Objects.equals(cmdCode, "help")) {
                 System.out.println("changevalue <state name> <state value> <?true/false>");
                 System.out.println("byzantinedisable");
                 System.out.println("byzantineenable");
