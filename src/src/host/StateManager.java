@@ -41,7 +41,7 @@ public class StateManager {
         return commitEntry(stateLog.size() - 1);
     }
 
-    public boolean commitEntry(int at) {
+    public synchronized boolean commitEntry(int at) {
         LogEntry logToCommit = stateLog.get(at);
 //        System.out.println(fileStoreHandler == null);
 //        System.out.println(logToCommit.getState());
