@@ -8,6 +8,7 @@ public class LogEntry {
     private int term;
     private int index; // index maybe not needed
     private boolean isCommitted;
+    private boolean isByzantune;
 
     /**
      * This constructor builds a LogEntry with input data and set isCommitted field false.
@@ -23,6 +24,7 @@ public class LogEntry {
         this.index = index;
         //this.index = index;
         isCommitted = false;
+        isByzantune = false;
     }
 
     /**
@@ -81,6 +83,14 @@ public class LogEntry {
         };
         String result = String.join(",", array);
         return result;
+    }
+
+    public void setByzantine(boolean enable){
+        isByzantune = enable;
+    }
+
+    public boolean isByzantune(){
+        return isByzantune;
     }
 
 }
