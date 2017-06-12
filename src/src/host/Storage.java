@@ -89,12 +89,13 @@ public class Storage {
             byte b;
             long length = randomAccessFile.length() ;
             if (length != 0) {
+                length -= 1;
                 do {
                     length -= 1;
                     randomAccessFile.seek(length);
                     b = randomAccessFile.readByte();
                 } while (b != 10 && length > 0);
-                randomAccessFile.setLength(length);
+                randomAccessFile.setLength(length + 1);
                 randomAccessFile.close();
             }
         }catch (IOException exception) {
