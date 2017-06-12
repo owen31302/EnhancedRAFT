@@ -87,7 +87,7 @@ public class Client {
                         Socket socket = new Socket(s.getHostIp(), s.getHostPort());
                         ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
                         outStream.flush();
-                        outStream.writeInt(Protocol.EnableByzantine);
+                        outStream.writeInt(Protocol.DisableByzantine);
                         outStream.flush();
                         ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
                         if(inStream.readInt() != Protocol.ACKOWLEDGEMENT){

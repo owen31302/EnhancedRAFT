@@ -15,7 +15,7 @@ public class StateManager {
     StateManager(String[] stateName, String hostName){
         stateLog = new ArrayList<LogEntry>(16);
         states = new HashMap<>();
-
+        this.fileStoreHandler = new Storage(hostName);
         int i = 0;
         for (String name: stateName) {
             State initializedState = new State(name, 0);
@@ -26,7 +26,6 @@ public class StateManager {
             i++;
         }
 //        this.hostName = hostName;
-        this.fileStoreHandler = new Storage(hostName);
         // reconver logentry from disk
        // stateLog.addAll(Arrays.asList(fileStoreHandler.getAllCommitedValue()));
     }
@@ -44,6 +43,8 @@ public class StateManager {
 
     public boolean commitEntry(int at) {
         LogEntry logToCommit = stateLog.get(at);
+//        System.out.println(fileStoreHandler == null);
+//        System.out.println(logToCommit.getState());
         if (logToCommit == null) {
             System.out.println("no found");
             return false;

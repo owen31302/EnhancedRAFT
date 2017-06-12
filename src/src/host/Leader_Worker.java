@@ -17,7 +17,7 @@ public class Leader_Worker implements Runnable {
     private int _leaderJob;
     private Leader _leader;
     private Host _host;
-    private boolean commentFlag = false;
+    private boolean commentFlag = true;
 
     public Leader_Worker(Leader leader, int leaderJob, String hostName, Host host){
         _leader = leader;
@@ -197,7 +197,7 @@ public class Leader_Worker implements Runnable {
                         _leader.get_isFindNextIndex().remove(_hostName);
                     }else{
                         if (commentFlag){
-                            System.out.println("Some error 4");
+                            System.out.println("Some error 4:" + msg);
                         }
                     }
                 }else {

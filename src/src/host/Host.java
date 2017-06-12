@@ -289,7 +289,7 @@ public class Host extends Thread implements Observer{
                         System.out.println(hostManager);
                         followerThread = new Thread( follower );
                         followerThread.setDaemon(true);
-                        followerThread.start();
+                     //   followerThread.start();
                         break;
 
                     case Protocol.CHANGEVALUE:
@@ -299,10 +299,10 @@ public class Host extends Thread implements Observer{
                         oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
                         if (leader.addState(new host.State(stateName, newValue), byzantin)) {
-                            oOut.writeObject("State changed.");
+                            oOut.writeObject("Yes");
                         }
                         else {
-                            oOut.writeObject("State change fail.");
+                            oOut.writeObject("No");
                         }
                         break;
 
@@ -310,7 +310,18 @@ public class Host extends Thread implements Observer{
                         oOut.writeObject(hostManager.getLeaderAddress().getHostIp());
                         break;
 
-                    case Protocol.RPCREQUEST:
+                    case Protocol.EnableByzantine:
+                        bTolerance = (boolean)oIn.readObject();
+                        oOut.writeInt(Protocol.ACKOWLEDGEMENT);
+                        oOut.flush();
+                        break;
+
+                    case Protocol.DisableByzantine:
+                        bTolerance = (boolean)oIn.readObject();
+                        oOut.writeInt(Protocol.ACKOWLEDGEMENT);
+                        oOut.flush();
+                        break;
+                                            case Protocol.RPCREQUEST:
                         //System.out.println("QQ6");
                         TCP_Communicator tempTCP = new TCP_Communicator();
                         //System.out.println("QQ5");
@@ -359,7 +370,7 @@ public class Host extends Thread implements Observer{
                                      break;
                                 }
 
-                                if (aurgments[4] != null) {
+                                if (aurgments[4] != null && bTolerance) {
                                     receivedMSG.setMessageType(RPCs.FORWARD);
                                     tempTCP.initSendToAll(hostManager, new TCP_ReplyMsg_All(), receivedMSG);
                                     planText = fCollector.getResult();
@@ -385,12 +396,12 @@ public class Host extends Thread implements Observer{
                                     hostManager.setLeaderAddress(leaderName);
                                     currentTerm = leaderTerm;
                                     follower.receivedHeartBeat();
-//                                    System.out.println(stateManager.getLastIndex() <= leaderTerm);
-//                                    System.out.println(stateManager.getLog(preLogIndex).getTerm() == preLogTerm);
-//                                    System.out.println(stateManager.getLastIndex());
-//                                    System.out.println(leaderTerm);
-//                                    System.out.println(preLogTerm);
-//                                    System.out.println(stateManager.getLog(preLogIndex).getTerm());
+                                    System.out.println(stateManager.getLastIndex());
+                                    System.out.println(stateManager.getLog(preLogIndex).getTerm() == preLogTerm);
+                                    System.out.println(preLogIndex);
+                                    System.out.println(leaderTerm);
+                                    System.out.println(preLogTerm);
+                                    System.out.println(stateManager.getLog(preLogIndex).getTerm());
 
                                     if (stateManager.getLastIndex() >= preLogIndex && stateManager.getLog(preLogIndex).getTerm() == preLogTerm) {
                                         if (!newState.equals("")) {
@@ -456,18 +467,12 @@ public class Host extends Thread implements Observer{
 //        } catch (InterruptedException e2){
 //            e2.printStackTrace();
 //        }
-        /*try {
+        try {
             Host aHost = new Host();
             aHost.start();
         } catch (IOException e) {
             e.printStackTrace();
-        }*/
-        String str = null;
-        String string = null;
-        if(str == string){
-            System.out.println("yes");
-        }else{
-            System.out.println("no");
         }
+
     }
 }
