@@ -1,6 +1,9 @@
 # EnhancedRAFT
 
-##Set up
+## Youtube Demo
+https://youtu.be/OKGDKTkXQng
+
+## Set up
 
 Folder Communicator, folder host, folder signedMethods 
 and make file need to put in one same directory.
@@ -20,7 +23,7 @@ use the make file
 
 
 
-##host.Host
+## host.Host
 
 The host.Host would start a enhanced RAFT server on the 
 current machine. A state log file, storing the committed
@@ -29,7 +32,7 @@ current machine. A state log file, storing the committed
 Without further instruction, the host would remain isolated,
 and it is running without RAFT functionality.
 
-##host.Clent
+## host.Clent
 
 The host.Client acts as a interface. It is used to connect
 all the server together.  All the commands are sent from here. 
