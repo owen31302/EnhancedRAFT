@@ -1,5 +1,11 @@
 # EnhancedRAFT
 
+## System Overview
+This is the Enhanced RAFT system overview implements in this github.
+<img src='https://github.com/owen31302/EnhancedRAFT/blob/master/src/Pics/Enhanced%20RAFT.png?raw=true' title='Enhanced RAFT System Overview' width='' alt='Enhanced RAFT System Overview' />
+The following picture is for comparsion between Enhanced RAFT and original RAFT.
+<img src='https://github.com/owen31302/EnhancedRAFT/blob/master/src/Pics/Ori%20RAFT.png?raw=true' title='RAFT Overview' width='' alt='RAFT Overview' />
+
 ## Youtube Demo
 https://youtu.be/OKGDKTkXQng
 
@@ -64,6 +70,14 @@ host machines.
 
 ## Authors (4)
 Team leader & Code coordinator: Ting-Chi Yeh
+
 Communication & Encryption: Shan He
+
 User interaction & Persistent storage: Yujian Zhang
+
 RAFT character switching: Yu-Cheng Lin
+
+## Class diagram for Enhanced RAFT
+<img src='https://github.com/owen31302/EnhancedRAFT/blob/master/src/Pics/UML.png?raw=true' title='Classes implementation' width='' alt='Classes implementation' />
+
+
