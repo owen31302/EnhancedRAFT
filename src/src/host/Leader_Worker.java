@@ -190,7 +190,9 @@ public class Leader_Worker implements Runnable {
                         }
                         _leader.get_isFindNextIndex().remove(_hostName);
                     }else if(msg.equals(RPCs.BFAIL)){
-                        System.out.println("RPCs.BFAIL 3");
+                        if (commentFlag){
+                            System.out.println("RPCs.BFAIL 3");
+                        }
                     }else{
                         if (commentFlag){
                             System.out.println("Some error 3");
