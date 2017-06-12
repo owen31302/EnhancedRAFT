@@ -6,6 +6,7 @@ import signedMethods.SignedMessage;
 
 import javax.annotation.processing.SupportedSourceVersion;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -127,23 +128,35 @@ public class Leader_Worker implements Runnable {
                 }
                 // 前面兩個都通過了，才會執行user request
                 // 如果投票一直沒過，follower就不斷覆蓋同個位置上的log
+                int size = 1000;
                 synchronized (_leader._queue){
                     if(!_leader._queue.isEmpty()){
                         Leader.BState bState = _leader.getState();
-                        _host.getStateManager().appendAnEntry(bState._state, _host.getCurrentTerm());
                         if(bState._isByzantine){
-                            int size = 1000;
+                            bState._state.setByzaninte(true);
+                            _host.getStateManager().appendAnEntry(bState._state, _host.getCurrentTerm());
                             int randomValue = ThreadLocalRandom.current().nextInt(0, size);
                             State newState = new State(bState._state.getStateName(), randomValue);
                             appendEntryArray[4] = newState.toString();
+                            System.out.println("Byzaninte message 1");
                         }else{
+                            _host.getStateManager().appendAnEntry(bState._state, _host.getCurrentTerm());
                             appendEntryArray[4] = bState._state.toString();
+                            System.out.println("unByzaninte message 1");
                         }
                     }else{
                         State state = _host.getStateManager().getLastLog().getState();
                         appendEntryArray[2] = String.valueOf(_host.getStateManager().getLog(_host.getStateManager().getLastIndex()-1).getIndex());
                         appendEntryArray[3] = String.valueOf(_host.getStateManager().getLog(_host.getStateManager().getLastIndex()-1).getTerm());
-                        appendEntryArray[4] = state.toString();
+                        if(state.isByzaninte()){
+                            int randomValue = ThreadLocalRandom.current().nextInt(0, size);
+                            State newState = new State(state.getStateName(), randomValue);
+                            appendEntryArray[4] = newState.toString();
+                            System.out.println("Byzaninte message 2");
+                        }else{
+                            appendEntryArray[4] = state.toString();
+                            System.out.println("unByzaninte message 2");
+                        }
                     }
                 }
                 appendEntry = String.join(",", appendEntryArray);
