@@ -58,10 +58,6 @@ public class Client {
                     System.out.print(s.getHostPort());
                     System.out.println(".");
                 }
-            }else if (Objects.equals(cmdCode, "quit")) {
-                // no need to do this
-                // could just ctrl + C
-                break;
             }else if (Objects.equals(cmdCode, "byzantineenable")) {
                 for (HostAddress s: serverInfos) {
                     try{
@@ -104,7 +100,6 @@ public class Client {
                 System.out.println("byzantinedisable");
                 System.out.println("byzantineenable");
                 System.out.println("quit");
-                System.out.println("help");
                 System.out.println("add (<host ip>, <host port>)");
             }else if (Objects.equals(cmdCode, "changeValue")) {
                 // input goes like
@@ -240,8 +235,6 @@ public class Client {
             return "byzantineenable";
         }else if (input.length() >= "byzantinedisable".length() && input.substring(0, "byzantinedisable".length()).toLowerCase().equals("byzantinedisable")){
             return "byzantinedisable";
-        }else if (input.length() >= "quit".length() && input.substring(0, "quit".length()).toLowerCase().equals("quit")){
-            return "quit";
         }else if (input.length() >= "changevalue".length() && input.substring(0, "changevalue".length()).toLowerCase().equals("changevalue")){
             return "changeValue";
         }else if (input.length() >= "help".length() && input.substring(0, "help".length()).toLowerCase().equals("help")){
