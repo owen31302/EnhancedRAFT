@@ -20,9 +20,6 @@ use the make file
 
 >need the client to set up the cluster
 
-
-
-
 ## host.Host
 
 The host.Host would start a enhanced RAFT server on the 
@@ -64,3 +61,9 @@ host machines.
     help
     
 >Cheat sheet of all the instructions
+
+## Authors (4)
+Team leader & Code coordinator: Ting-Chi Yeh
+Communication & Encryption: Shan He
+User interaction & Persistent storage: Yujian Zhang
+RAFT character switching: Yu-Cheng Lin
