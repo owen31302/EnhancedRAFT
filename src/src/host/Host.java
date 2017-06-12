@@ -384,7 +384,13 @@ public class Host extends Thread implements Observer{
                                     planText = fCollector.getResult();
                                     System.out.println("plantext: " + planText);
                                    // System.out.println("************************************************************");
+                                    if (planText == null) {
+                                        System.out.println("Bfail");
+                                        tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.BFAIL, privateKey));
+                                        break;
+                                    }
                                     aurgments = planText.split(",");
+
                                 }
 
                                 follower.receivedHeartBeat();
