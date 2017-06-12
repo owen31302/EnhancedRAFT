@@ -6,6 +6,7 @@ package host;
 public class State {
     private String stateName;
     private int stateValue;
+    private boolean isByzaninte;
 
     /**
      * This constructor builds instance with input value.
@@ -15,6 +16,7 @@ public class State {
     State(String stateName, int stateValue){
         this.stateName = stateName;
         this.stateValue = stateValue;
+        isByzaninte = false;
     }
 
     /**
@@ -50,7 +52,9 @@ public class State {
     }
 
     public State clone(){
-        return new State(stateName, stateValue);
+        State temp = new State(stateName, stateValue);
+        temp.setByzaninte(isByzaninte);
+        return temp;
     }
 
     /**
@@ -63,5 +67,13 @@ public class State {
             return true;
         }
         return false;
+    }
+
+    public boolean isByzaninte(){
+        return  isByzaninte;
+    }
+
+    public void setByzaninte(boolean isByzaninte){
+        this.isByzaninte = isByzaninte;
     }
 }

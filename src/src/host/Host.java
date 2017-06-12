@@ -374,7 +374,7 @@ public class Host extends Thread implements Observer{
                                     break;
                                 }
 
-                                if (aurgments[4] != null && bTolerance) { //if not heartbeat, forward
+                                if (aurgments[4].equals("") && bTolerance) { //if not heartbeat, forward
                                     receivedMSG.setMessageType(RPCs.FORWARD);
                                     tempTCP.initSendToAll(hostManager, new TCP_ReplyMsg_All(), receivedMSG);
                                     planText = fCollector.getResult();
