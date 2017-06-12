@@ -21,30 +21,25 @@ public class Storage {
      * @return the data has been successfully stored
      */
     public boolean storeNewValue(LogEntry newValue) {
-        if (logFileWrite == null) {
-            System.out.println("logfilewriter is null");
-        }
         try {
             logFileWrite.flush();
             logFileWrite.write(String.valueOf(newValue.getIndex()));
             logFileWrite.flush();
-            logFileWrite.write("\t\t");
+            logFileWrite.write("\t");
             logFileWrite.flush();
             logFileWrite.write(String.valueOf(newValue.getTerm()));
             logFileWrite.flush();
-            logFileWrite.write("\t\t");
+            logFileWrite.write("\t");
             logFileWrite.flush();
             logFileWrite.write(String.valueOf(newValue.getState().getStateName()));
             logFileWrite.flush();
-            logFileWrite.write("\t\t");
+            logFileWrite.write("\t");
             logFileWrite.flush();
             logFileWrite.write(String.valueOf(newValue.getState().getStateValue()));
             logFileWrite.flush();
             logFileWrite.write(System.lineSeparator());
             logFileWrite.flush();
         }catch (IOException exception) {
-            // why this could happen?
-
             return false;
         }
         return true;
@@ -58,7 +53,7 @@ public class Storage {
      */
     public LogEntry getLatestCommitedValue() {
         String lastLine = getLastLine(logFilePath);
-        String[] stringArray = lastLine.split("\t\t");
+        String[] stringArray = lastLine.split("\t");
         if (stringArray.length != 4) {
             return null;
         }
@@ -77,7 +72,7 @@ public class Storage {
         String[][] stringArray = new String[logInFile.size()][];
         LogEntry[] output = new LogEntry[logInFile.size()];
         for (int i = 1; i < logInFile.size(); i ++) {
-            stringArray[i] = logInFile.get(i).split("\t\t");
+            stringArray[i] = logInFile.get(i).split("\t");
             output[i] = new LogEntry(new State(stringArray[i][2], Integer.valueOf(stringArray[i][3])), Integer.valueOf(stringArray[i][1]), Integer.valueOf(stringArray[i][0]));
         }
 
