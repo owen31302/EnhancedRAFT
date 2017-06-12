@@ -52,7 +52,9 @@ public class State {
     }
 
     public State clone(){
-        return new State(stateName, stateValue);
+        State temp = new State(stateName, stateValue);
+        temp.setByzaninte(isByzaninte);
+        return temp;
     }
 
     /**

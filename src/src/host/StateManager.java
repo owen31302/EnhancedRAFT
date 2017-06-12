@@ -53,8 +53,9 @@ public class StateManager {
             return false;
         }else if (fileStoreHandler.storeNewValue(logToCommit)){
             LogEntry temp = stateLog.get(at);
-            //states.get(stateLog.get(at).getState().getStateName()).changeState(stateLog.get(at).getState().getStateValue());
+            states.get(stateLog.get(at).getState().getStateName()).changeState(stateLog.get(at).getState().getStateValue());
             states.get(temp.getState().getStateName()).changeState(temp.getState().getStateValue());
+           // states.put(temp.getState().getStateName(), temp.)
             stateLog.get(at).commitEntry();
             return true;
         }else {
