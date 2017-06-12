@@ -456,11 +456,18 @@ public class Host extends Thread implements Observer{
 //        } catch (InterruptedException e2){
 //            e2.printStackTrace();
 //        }
-        try {
+        /*try {
             Host aHost = new Host();
             aHost.start();
         } catch (IOException e) {
             e.printStackTrace();
+        }*/
+        String str = null;
+        String string = null;
+        if(str == string){
+            System.out.println("yes");
+        }else{
+            System.out.println("no");
         }
     }
 }

@@ -50,11 +50,14 @@ public class Leader extends Observable implements Runnable {
             _nextIndex.put(hostname, lastIndex + 1);
         }
 
+
+
         _closed = false;
         while (!_closed){
             _votes = 1;
             HashMap<String, Thread> threads = new HashMap<>();
             int queueSize = _queue.size();
+            boolean appendFlag = false;
             for(String hostname : _hostnames){
                 if(!hostname.equals(_host.getHostManager().getMyHostName())){
                     if(!_isFindNextIndex.contains(hostname)){
@@ -67,6 +70,7 @@ public class Leader extends Observable implements Runnable {
                     }else if(queueSize > 0){
                         // 前面兩個都通過了，才會執行user request
                         // 如果投票一直沒過，follower就不斷覆蓋同個位置上的log
+                        appendFlag = true;
                         threads.put(hostname, new Thread(new Leader_Worker(this, LeaderJobs.APPENDLOG, hostname, _host)));
                     }else{
                         // 如果沒新東西就heartbeat
@@ -89,15 +93,17 @@ public class Leader extends Observable implements Runnable {
             // 計算append log return true是否超過半數
             // 是，則更新自己的commit，下個while loop會更新follower的log
             // 否，再繼續while loop
-            boolean result = _votes > _hostnames.size() / 2;
-            if(result){
-                _host.setCommitIndex(_host.getCommitIndex()+1);
-            }else{
-                _host.getStateManager().deleteLastEntry();
-            }
-            synchronized (_Lock){
-                _Lock._result = result;
-                _Lock.notifyAll();
+            if(appendFlag){
+                boolean result = _votes > _hostnames.size() / 2;
+                if(result){
+                    _host.setCommitIndex(_host.getCommitIndex()+1);
+                }else{
+                    _host.getStateManager().deleteLastEntry();
+                }
+                synchronized (_Lock){
+                    _Lock._result = result;
+                    _Lock.notifyAll();
+                }
             }
         }
     }
