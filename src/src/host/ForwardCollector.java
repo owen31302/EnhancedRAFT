@@ -44,11 +44,13 @@ public class ForwardCollector {
         for (Map.Entry<String, Integer> a: forwardMsg.entrySet()) {
             if (a.getValue() >= majoritySize) {
                 System.out.println("max: " + a.getValue());
+                forwardMsg = new HashMap<>();
                 return a.getKey();
             }
         }
         System.out.println("not find");
         forwardMsg = new HashMap<>(); //clean old data;
+
         return null;
     }
 

@@ -377,15 +377,16 @@ public class Host extends Thread implements Observer{
                                 if (!aurgments[4].equals("") && bTolerance) { //if not heartbeat, forward
                                 //    System.out.println(" aurgments[4] " + aurgments[4]);
                                     receivedMSG.setMessageType(RPCs.FORWARD);
+                                    System.out.println("plantext222: " + receivedMSG.getPlanText(hostManager.getPublicKey(aSocket.getInetAddress().getHostAddress())));
                                     TCP_Communicator newTCP = new TCP_Communicator();
                                     newTCP.initSendToAll(hostManager, new TCP_ReplyMsg_All(), receivedMSG, -1);
                                     Thread.sleep(100);
                                     //System.out.println("===========================================================");
                                     planText = fCollector.getResult();
-                                    System.out.println("plantext: " + planText);
+                                    System.out.println("plantext!!!: " + planText);
                                    // System.out.println("************************************************************");
                                     if (planText == null) {
-                                        System.out.println("Bfail");
+                                        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Bfail");
                                         tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.BFAIL, privateKey));
                                         break;
                                     }
