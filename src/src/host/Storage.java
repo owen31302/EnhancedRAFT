@@ -21,6 +21,9 @@ public class Storage {
      * @return the data has been successfully stored
      */
     public boolean storeNewValue(LogEntry newValue) {
+        if (logFileWrite == null) {
+            System.out.println("logfilewriter is null");
+        }
         try {
             logFileWrite.flush();
             logFileWrite.write(String.valueOf(newValue.getIndex()));
@@ -55,7 +58,10 @@ public class Storage {
      */
     public LogEntry getLatestCommitedValue() {
         String lastLine = getLastLine(logFilePath);
-        String[] stringArray = lastLine.split("\t");
+        String[] stringArray = lastLine.split("\t\t");
+        if (stringArray.length != 4) {
+            return null;
+        }
         return new LogEntry(new State(stringArray[2], Integer.valueOf(stringArray[3])), Integer.valueOf(stringArray[1]), Integer.valueOf(stringArray[0]));
     }
 
@@ -65,6 +71,9 @@ public class Storage {
      */
     public LogEntry[] getAllCommitedValue() {
         ArrayList<String> logInFile = getAllLine();
+        if (logInFile.size() <= 1) {
+            return null;
+        }
         String[][] stringArray = new String[logInFile.size()][];
         LogEntry[] output = new LogEntry[logInFile.size()];
         for (int i = 1; i < logInFile.size(); i ++) {
@@ -135,6 +144,18 @@ public class Storage {
         return Integer.valueOf(stringArray[0]);
     }
 
+
+    /**
+     * delete all file in the disk
+     * called when a host need to go down according to schedule
+     */
+    public void cleanStorage() {
+        logFile.delete();
+        voteFile.delete();
+    }
+
+
+
     /**
      * Return last vote to host ID
      * @return
@@ -153,9 +174,7 @@ public class Storage {
         // make dir
 
         if (new File("./" + hostName).mkdir()) {
-
         }else {
-            System.out.println("make directory failed");
         }
 
         logFilePath = "./" + hostName + "/logFile.txt";
