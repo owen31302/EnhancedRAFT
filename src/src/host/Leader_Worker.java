@@ -18,7 +18,7 @@ public class Leader_Worker implements Runnable {
     private int _leaderJob;
     private Leader _leader;
     private Host _host;
-    private boolean commentFlag = true;
+    private boolean commentFlag = false;
 
     public Leader_Worker(Leader leader, int leaderJob, String hostName, Host host){
         _leader = leader;
@@ -83,7 +83,9 @@ public class Leader_Worker implements Runnable {
                         }
                     }
                 }else {
-                    System.out.println("Result False 1");
+                    if (commentFlag){
+                        System.out.println("Result False 1");
+                    }
                 }
                 break;
             case LeaderJobs.KEEPUPLOG:
@@ -119,7 +121,9 @@ public class Leader_Worker implements Runnable {
                         }
                     }
                 }else {
-                    System.out.println("Result False 2");
+                    if (commentFlag){
+                        System.out.println("Result False 2");
+                    }
                 }
                 break;
             case LeaderJobs.APPENDLOG:
@@ -138,11 +142,15 @@ public class Leader_Worker implements Runnable {
                             int randomValue = ThreadLocalRandom.current().nextInt(0, size);
                             State newState = new State(bState._state.getStateName(), randomValue);
                             appendEntryArray[4] = newState.toString();
-                            System.out.println("Byzaninte message 1");
+                            if (commentFlag){
+                                System.out.println("Byzaninte message 1");
+                            }
                         }else{
                             _host.getStateManager().appendAnEntry(bState._state, _host.getCurrentTerm());
                             appendEntryArray[4] = bState._state.toString();
-                            System.out.println("unByzaninte message 1");
+                            if (commentFlag){
+                                System.out.println("unByzaninte message 1");
+                            }
                         }
                     }else{
                         State state = _host.getStateManager().getLastLog().getState();
@@ -152,10 +160,14 @@ public class Leader_Worker implements Runnable {
                             int randomValue = ThreadLocalRandom.current().nextInt(0, size);
                             State newState = new State(state.getStateName(), randomValue);
                             appendEntryArray[4] = newState.toString();
-                            System.out.println("Byzaninte message 2");
+                            if (commentFlag){
+                                System.out.println("Byzaninte message 2");
+                            }
                         }else{
                             appendEntryArray[4] = state.toString();
-                            System.out.println("unByzaninte message 2");
+                            if (commentFlag){
+                                System.out.println("unByzaninte message 2");
+                            }
                         }
                     }
                 }
@@ -185,7 +197,9 @@ public class Leader_Worker implements Runnable {
                         }
                     }
                 }else {
-                    System.out.println("Result False 3");
+                    if (commentFlag){
+                        System.out.println("Result False 3");
+                    }
                 }
                 break;
             case LeaderJobs.HEARTBEAT:
@@ -214,7 +228,9 @@ public class Leader_Worker implements Runnable {
                         }
                     }
                 }else {
-                    System.out.println("Result False 4");
+                    if (commentFlag){
+                        System.out.println("Result False 4");
+                    }
                 }
                 break;
         }
