@@ -79,8 +79,8 @@ public class StateManager {
     public boolean deleteLastEntry() {
         if (stateLog.isEmpty()) {
             return true;
-        }
-        if (fileStoreHandler.deleteLatestCommitedValue()) {
+        } //fileStoreHandler.deleteLatestCommitedValue()
+        if (true) {
             stateLog.remove(stateLog.size()-1);
             return true;
         }else {
