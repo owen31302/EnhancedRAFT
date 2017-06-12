@@ -96,9 +96,11 @@ public class Leader extends Observable implements Runnable {
             if(appendFlag){
                 boolean result = _votes > _hostnames.size() / 2;
                 if(result){
+                    System.out.println("Commit 1");
                     _host.setCommitIndex(_host.getCommitIndex()+1);
                     _host.getStateManager().commitEntry(_host.getCommitIndex());
                 }else{
+                    System.out.println("deleteLastEntry 1");
                     _host.getStateManager().deleteLastEntry();
                 }
                 synchronized (_Lock){
@@ -134,8 +136,9 @@ public class Leader extends Observable implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            System.out.println("_Lock._result: " + _Lock._result);
+            return _Lock._result;
         }
-        return _Lock._result;
     }
 
     public BState getState(){
