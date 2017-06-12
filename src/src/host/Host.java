@@ -190,7 +190,7 @@ public class Host extends Thread implements Observer{
                     }
                 }
 
-                System.out.println("command:" + command);
+               // System.out.println("command:" + command);
                 switch (command) {
                     case Protocol.ADDHOSTADDRESS:
                         ArrayList<HostAddress> hostAddressArrayList = (ArrayList<HostAddress>)(oIn.readObject());
@@ -321,7 +321,8 @@ public class Host extends Thread implements Observer{
                         oOut.writeInt(Protocol.ACKOWLEDGEMENT);
                         oOut.flush();
                         break;
-                                            case Protocol.RPCREQUEST:
+
+                        case Protocol.RPCREQUEST:
                         //System.out.println("QQ6");
                         TCP_Communicator tempTCP = new TCP_Communicator();
                         //System.out.println("QQ5");
@@ -334,8 +335,8 @@ public class Host extends Thread implements Observer{
                         HostAddress requestHost = hostManager.getHostAddress(aSocket.getInetAddress().getHostName());
                         //System.out.println("QQ1");
                         String planText = receivedMSG.getPlanText(hostManager.getPublicKey(aSocket.getInetAddress().getHostAddress()));
-                        System.out.println("Plan text: " + planText);
-                        System.out.println("RPC: " + RPC);
+                       // System.out.println("Plan text: " + planText);
+                        //System.out.println("RPC: " + RPC);
                         String[] aurgments = new String[4];
                         if (planText != null) {
                             aurgments = planText.split(",");
@@ -377,16 +378,16 @@ public class Host extends Thread implements Observer{
                                 if (!aurgments[4].equals("") && bTolerance) { //if not heartbeat, forward
                                 //    System.out.println(" aurgments[4] " + aurgments[4]);
                                     receivedMSG.setMessageType(RPCs.FORWARD);
-                                    System.out.println("plantext222: " + receivedMSG.getPlanText(hostManager.getPublicKey(aSocket.getInetAddress().getHostAddress())));
+                                    //System.out.println("plantext222: " + receivedMSG.getPlanText(hostManager.getPublicKey(aSocket.getInetAddress().getHostAddress())));
                                     TCP_Communicator newTCP = new TCP_Communicator();
                                     newTCP.initSendToAll(hostManager, new TCP_ReplyMsg_All(), receivedMSG, -1);
                                     Thread.sleep(100);
                                     //System.out.println("===========================================================");
                                     planText = fCollector.getResult();
-                                    System.out.println("plantext!!!: " + planText);
+                                 //   System.out.println("plantext!!!: " + planText);
                                    // System.out.println("************************************************************");
                                     if (planText == null) {
-                                        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Bfail");
+                                   //     System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Bfail");
                                         tempTCP.replyToOne(onewayCommunicationPackage, new SignedMessage(RPCs.APPENDENTRY, RPCs.BFAIL, privateKey));
                                         break;
                                     }
