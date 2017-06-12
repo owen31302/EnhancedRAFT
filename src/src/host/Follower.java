@@ -82,7 +82,7 @@ public class Follower extends Observable implements Runnable {
 
     private int randomTimeout(){
         int result = ( int ) ( Math.random() * DURATION ) + BASELATENCY;
-        System.out.println("Follower Timer reset to " + result + " ms");
+        //System.out.println("Follower Timer reset to " + result + " ms");
         return result;
     }
 
